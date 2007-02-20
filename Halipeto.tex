@@ -1,0 +1,101 @@
+%  
+% Halipeto 1.0 -  Haskell static web page generator 
+% Copyright 2004 Andrew Cooke (andrew@acooke.org) 
+%  
+%     This program is free software; you can redistribute it and/or modify 
+%     it under the terms of the GNU General Public License as published by 
+%     the Free Software Foundation; either version 2 of the License, or 
+%     (at your option) any later version. 
+%  
+%     This program is distributed in the hope that it will be useful, 
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of 
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+%     GNU General Public License for more details. 
+%  
+%     You should have received a copy of the GNU General Public License 
+%     along with this program; if not, write to the Free Software 
+%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+%  
+% EXCEPT 
+%  
+% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml - 
+% see the COPYRIGHT and LICENSE in that directory.  The files included 
+% are a subset of the full HaXml distribution and have been modified to 
+% originate from the FromHaxml module (so that install on Win32 is 
+% easy). 
+%  
+
+\documentclass[a4paper,11pt]{article}
+
+\pagestyle{empty}
+\usepackage{haskell}
+
+\begin{document}
+
+\part{Halipeto 1.1}
+
+\section{Contents}
+
+\begin{itemize}
+
+\item Introduction --- Main Features; Design; Motivation;
+Documentation; Credits; Licencing.
+
+\item How it Works --- Templates; Functions; Dictionaries; SimpleDB
+Example; SQL Example (Haskell extensions); More Information
+
+\item Templates --- Context; Custom Functions; Pages; Reading a
+Template; Applying Functions; Driver
+
+\item Functions --- Arguments; hal:eval; hal:attribute; hal:text;
+hal:repeat; hal:eq; hal:xhtml; hal:element; Defaults
+
+\item Pages --- Using the Database; Standard State; Menu
+
+\item Dictionary --- Namespaces and Subsets; Class; Case; Partition;
+Substitution; Subtrees; Implementation
+
+\item Simple Database --- File Formats; Readinng Data
+
+\item Utilities
+
+\item Demonstration --- Database; Site Structure; Menu; Generating the
+Site; Group Contents; Menu Code
+
+\end{itemize}
+
+\input{Intro.lhs}
+
+\vfill\eject
+
+\input{How.lhs}
+
+\vfill\eject
+
+\input{Template.lhs}
+
+\vfill\eject
+
+\input{Functions.lhs}
+
+\vfill\eject
+
+\input{Pages.lhs}
+
+\vfill\eject
+
+\input{Dictionary.lhs}
+
+\vfill\eject
+
+\input{SimpleDB.lhs}
+
+\vfill\eject
+
+\input{Utilities.lhs}
+
+\vfill\eject
+
+\input{Demo.lhs}
+
+\end{document}
