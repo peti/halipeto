@@ -1,0 +1,13 @@
+this image (and all the others in this series) was generated in a
+"recursive" manner.  in this case the process starts with a single dot
+in the centre of the screen. this dot is transformed by several
+translations and changes of hue to give a collection of new dots.
+each of those dots, in turn, is processed in the same way.  this
+continues for several iterations, until the picture is complete.
+
+fragmented, angular features come from the coordinate system used,
+which "wraps around" the image.  the rectangular frame of the picture
+becomes part of the image itself.
+
+the splintered, saturated colours reminded me of light scattered from
+cut glass, hence the name.

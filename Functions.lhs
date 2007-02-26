@@ -1,6 +1,7 @@
 %  
-% Halipeto 1.0 -  Haskell static web page generator 
+% Halipeto 2.0 -  Haskell static web page generator 
 % Copyright 2004 Andrew Cooke (andrew@acooke.org) 
+% Copyright 2007 Peter Simons (simons@cryp.to) 
 %  
 %     This program is free software; you can redistribute it and/or modify 
 %     it under the terms of the GNU General Public License as published by 
@@ -31,7 +32,7 @@ This section describes the Custom Functions available by default in
 the hal namespace.
 
 \begin{code}
-module Functions (
+module Halipeto.Functions (
   split, parse,
   eval, attribute, text, textReplace, textAfter, repeat,
   addDefaultsFn,
@@ -39,12 +40,12 @@ module Functions (
 ) where
 
 import Prelude hiding (repeat)
-import Template
-import Dictionary
-import Utilities
+import Halipeto.Template
+import Halipeto.Dictionary
+import Halipeto.Utilities
 import Char
-import FromHaxml.Types
-import FromHaxml.Parse
+import Text.XML.HaXml.Parse
+import Text.XML.HaXml.Types
 \end{code}
 
 \subsection{Argument Lists}
@@ -63,8 +64,8 @@ split n s =
       Nothing -> error $ "too few arguments (<" ++ (show n) ++ "): " ++ s
 
 split' :: Int -> [String] -> String -> String -> Maybe [String]
-split' _ l a ""                = Nothing
-split' 1 l a s                 = Just $ l ++ [dropSpace s]
+split' _ _ _ ""                = Nothing
+split' 1 l _ s                 = Just $ l ++ [dropSpace s]
 split' n l a (c:s) | isSpace c = split' (n-1) (l++[a]) "" (dropSpace s)
                    | otherwise = split' n l (a++[c]) s
 \end{code}
@@ -240,7 +241,7 @@ parseElements txt = fromElement $ parseElement "parseelements" txt
   where
     fromElement (Elem "parseelements" _ els) = map unContent els
     unContent (CElem x) = x
-    unContent s@(CString _ x) = Elem "p" [] [s]
+    unContent s@(CString _ _) = Elem "p" [] [s]
     unContent _ = error "cannot parse xml as element"
 \end{code}
 %%Haddock: Parse text as XML within an element
@@ -250,7 +251,7 @@ parseElement elt txt = fromDoc $ xmlParse txt txt'
   where
     txt' = "<?xml version='1.0' encoding='iso-8859-1'?><" ++ elt ++ ">"
              ++ txt ++ "</" ++ elt ++ ">"
-    fromDoc (Document _ _ el) = el
+    fromDoc (Document _ _ el _) = el
 \end{code}
 %%Haddock: Generate a function that inserts XML parsed from text
 \begin{code}

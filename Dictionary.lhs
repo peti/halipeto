@@ -1,6 +1,7 @@
 %  
-% Halipeto 1.0 -  Haskell static web page generator 
+% Halipeto 2.0 -  Haskell static web page generator 
 % Copyright 2004 Andrew Cooke (andrew@acooke.org) 
+% Copyright 2007 Peter Simons (simons@cryp.to) 
 %  
 %     This program is free software; you can redistribute it and/or modify 
 %     it under the terms of the GNU General Public License as published by 
@@ -45,7 +46,7 @@ interface are identified by appending ``NC'' to the case insensitive
 version.
 
 \begin{code}
-module Dictionary (
+module Halipeto.Dictionary (
   Dictionary, null, empty, emptyNC, toDot, fromDot,
   SubDictionary, OrdDictionary,
   add, add', addAll, addAll', search, search', keys, keys',
@@ -57,7 +58,7 @@ import Prelude hiding (null)
 import Char
 import List hiding (find, null, partition, insert)
 import Maybe
-import Utilities
+import Halipeto.Utilities
 \end{code}
 
 \subsection{Namespaces and Subsets}
@@ -336,7 +337,7 @@ pth d l p (c:s) | c == '\\' = pth' d l (p++[c]) s
       Nothing -> (toDot $ l++[p]) ++ (txt d s)
       Just x  -> (txt d x) ++ (txt d s)
                 | otherwise = pth d l (p++[c]) s
-pth' d l p ""               = error "end of string during character escape"
+pth' _ _ _ ""               = error "end of string during character escape"
 pth' d l p (c:s)            = pth d l (p++[c]) s
 
 unescape, unescape' :: String -> String
@@ -365,10 +366,10 @@ insert :: Unpacked a -> (String, a) -> Unpacked a
 insert (d, _) ("", x) = (d, Just x)
 insert (d, v) sx      = (copy f d sx, v)
   where
-    f n v = n {value = Just v}
+    f n v' = n {value = Just v'}
 
 find :: Unpacked a -> String -> Maybe a
-find (d, v) "" = v
+find (_, v) "" = v
 find (d, _) s  = apply f d s
   where
     f Empty = Nothing
@@ -380,7 +381,7 @@ The keys available in a dictionary can be listed with keys''.
 \begin{code}
 contents'' :: Unpacked a -> [(String, a)]
 contents'' (d, Just x)  = ("", x) : (contents'' (d, Nothing))
-contents'' (d, Nothing) = map rev $ foldD f (\s -> []) d ""
+contents'' (d, Nothing) = map rev $ foldD f (\_ -> []) d ""
   where
     f c (Just v) l m r s = [(c:s, v)] ++ (l s) ++ (m $ c:s) ++ (r s)
     f c Nothing  l m r s = (l s) ++ (m $ c:s) ++ (r s)
@@ -441,7 +442,7 @@ via the Ord class.
 children'' :: Unpacked a -> String -> [Unpacked a]
 children'' (d, Just x) "" = 
   combine $ (SU "" (Empty, Just x)):(sort $ subTree d [null])
-children'' (d, x) s  = combine . sort $ subTree d (s ++ [null])
+children'' (d, _) s  = combine . sort $ subTree d (s ++ [null])
 
 subTree :: Dict a -> String -> [SU a]
 subTree = apply f
@@ -462,7 +463,7 @@ collect d = foldD' f g d ("", Nothing)
                                  | otherwise =
       (l pre') ++ (m $ (c:pre, v)) ++ (r pre')
     g (pre, Just vp) = [SU (reverse pre) (Empty, Just vp)]
-    g (pre, Nothing) = []
+    g (_, Nothing)   = []
 
 data SU a = SU String (Unpacked a)
 
@@ -474,21 +475,19 @@ instance Eq (SU a) where
 
 compare' :: String -> String -> Ordering -> Ordering
 compare' []     []     def = def
-compare' _      []     def = GT
-compare' []      _     def = LT
+compare' _      []      _  = GT
+compare' []      _      _  = LT
 compare' (a:as) (b:bs) EQ  = compare' as bs (compare a b)
 compare' (_:as) (_:bs) def = compare' as bs def
 
 combine :: [SU a] -> [Unpacked a]
-combine l = map (\(SU s x) -> x) $ foldr f [] l
+combine l = map (\(SU _ x) -> x) $ foldr f [] l
   where
     f x                     []                                        = [x]
-    f a@(SU sa (da, Just xa)) (b@(SU sb (db, Just xb)):bs)            = a:b:bs
-    f a@(SU sa (_, Just xa))  (b@(SU sb (db, _)):bs)       | sa == sb =
-      (SU sa (db, Just xa)):bs
-    f a@(SU sa (da, _))       (b@(SU sb (_, Just xb)):bs)  | sa == sb =
-      (SU sa (da, Just xb)):bs
-    f a@(SU sa _)             (b@(SU sb _):bs)                        = a:b:bs
+    f a@(SU _  (_, Just _))   (b@(SU _  (_, Just _)):bs)              = a:b:bs
+    f   (SU sa (_, Just xa))  (  (SU sb (db, _)):bs)       | sa == sb = (SU sa (db, Just xa)):bs
+    f   (SU sa (da, _))       (  (SU sb (_, Just xb)):bs)  | sa == sb = (SU sa (da, Just xb)):bs
+    f a@(SU _  _)             (b@(SU _ _):bs)                         = a:b:bs
 
 adopt'' :: Unpacked a -> String -> Unpacked a -> Unpacked a
 adopt'' d      s (d', Just x)  = adopt'' (insert d (s, x)) s (d', Nothing)
@@ -525,6 +524,7 @@ foldD' f a n@(Node c v l m r) = f n c v (foldD' f a l)
 instance (Show a) => Show (Dict a) where
   show x = showDict x
 
+showDict :: (Show t) => Dict t -> [Char]
 showDict Empty = "-"
 showDict (Node c v l m r) = "[" ++ [c] ++ ":" ++ (show v) ++ "," ++
                               (show l) ++ "," ++ (show m) ++ "," ++ 
@@ -537,19 +537,19 @@ copy copies the tree.
 
 \begin{code}
 apply :: (Dict a -> b) -> Dict a -> String -> b
-apply fn = foldD' f (\s -> fn Empty)
+apply fn = foldD' f (\_ -> fn Empty)
   where
-    f n c _ l m r s'@[s]    | s == c = fn n
+    f n c _ l _ r s'@[s]    | s == c = fn n
                             | s < c  = l s'
                             | s > c  = r s'
-    f n c _ l m r s'@(s:ss) | s == c = m ss
+    f _ c _ l m r s'@(s:ss) | s == c = m ss
                             | s < c  = l s'
                             | s > c  = r s'
 
 copy :: (Dict a -> b -> Dict a) -> Dict a -> (String, b) -> Dict a
 copy fn = foldD' f g
   where
-    f n c v l m r a@((s:ss), v') | s == c && ss == [] = fn n v'
+    f n c _ l m r a@((s:ss), v') | s == c && ss == [] = fn n v'
                                  | s == c             = n {match = m (ss, v')}
                                  | s < c              = n {left = l a}
                                  | s > c              = n {right = r a}

@@ -1,6 +1,7 @@
 %  
-% Halipeto 1.0 -  Haskell static web page generator 
+% Halipeto 2.0 -  Haskell static web page generator 
 % Copyright 2004 Andrew Cooke (andrew@acooke.org) 
+% Copyright 2007 Peter Simons (simons@cryp.to) 
 %  
 %     This program is free software; you can redistribute it and/or modify 
 %     it under the terms of the GNU General Public License as published by 
@@ -164,8 +165,8 @@ Halipeto.tex also requires the source files (*.lhs).
 \subsection{Credits}
 
 Thanks to people on the Haskell mailing list for replying to
-questions.  Thanks also to the people that developed and relased
-HAXML.
+questions.  Thanks also to the people that developed and released
+HAXML.  Peter Simons contributed the patch for v2.0.
 
 \subsection{Licencing Conditions}
 
@@ -182,3 +183,7 @@ separate copyright and Licence --- see the LICENSE and COPYRIGHT files
 in that directory.
 
 Andrew Cooke can be contacted at andrew@acooke.org.
+
+Peter Simons extended this code to use HaXml via new--fangled libraries
+(version 2.0).  He probably understands how things work better than Andrew
+does, these days, and can be contacted at simons@cryp.to.

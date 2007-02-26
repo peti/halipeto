@@ -1,6 +1,7 @@
 %  
-% Halipeto 1.0 -  Haskell static web page generator 
+% Halipeto 2.0 -  Haskell static web page generator 
 % Copyright 2004 Andrew Cooke (andrew@acooke.org) 
+% Copyright 2007 Peter Simons (simons@cryp.to) 
 %  
 %     This program is free software; you can redistribute it and/or modify 
 %     it under the terms of the GNU General Public License as published by 

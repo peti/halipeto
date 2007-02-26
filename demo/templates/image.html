@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!--
+
+Halipeto 2.0 -  Haskell static web page generator
+Copyright 2004 Andrew Cooke (andrew@acooke.org)
+Copyright 2007 Peter Simons (simons@cryp.to)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+EXCEPT
+
+Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml -
+see the COPYRIGHT and LICENSE in that directory.  The files included
+are a subset of the full HaXml distribution and have been modified to
+originate from the FromHaxml module (so that install on Win32 is
+easy).
+
+-->
+  <head hal:textafter="{png-root}">
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+    <title hal:text="pancito - {images.{image}.details.title}"/>
+    <link type="text/css" rel="stylesheet"
+          hal:attribute="href {hal.root}/{default.cssdir}/pancito.css"/>
+  </head>
+  <body>
+
+<a name="menu" id="menu"> </a>
+
+<table class="fixed">
+
+  <tr>
+
+    <td class="navigation">
+      <a hal:attribute="href {hal.root}/index.html">
+        <img hal:attribute="src {hal.root}/{default.imgdir}/logo.png"
+             alt="pancito"/>
+      </a>
+      <div pan:menu=""/>
+    </td>
+
+    <td rowspan="2" class="pad-40">&nbsp;</td>
+
+    <td rowspan="2" class="image">
+      <a href="#discussion">
+        <img hal:attribute="src {hal.root}/{default.imgdir}/{images.{image}.details.src}-500.png"
+             hal:attribute="alt {images.{image}.details.title}"/>
+      </a>
+    </td>
+
+    <td class="pad-40" rowspan="2">
+      &nbsp;
+    </td>
+
+    <td class="details" rowspan="2">
+
+      <p>
+        <img hal:attribute="src {hal.root}/{default.imgdir}/square.png"
+             alt="."/>
+        <b hal:text=" {locales.{locale}.tradn.title} "/>
+        <span hal:text="{images.{image}.details.title}"/>
+      </p>
+
+      <p>
+        <img hal:attribute="src {hal.root}/{default.imgdir}/square.png"
+             alt="."/>
+        <b hal:text=" {locales.{locale}.tradn.date} "/>
+        <span hal:text="{images.{image}.details.date}"/>
+      </p>
+
+      <p>
+        <img hal:attribute="src {hal.root}/{default.imgdir}/square.png"
+             alt="."/>
+        <b hal:text=" {locales.{locale}.tradn.process} "/>
+        <span hal:text=" {images.{image}.{locale}.details.process}"/>
+      </p>
+
+      <p>
+        <img hal:attribute="src {hal.root}/{default.imgdir}/square.png"
+             alt="."/>
+        <b hal:text=" {locales.{locale}.tradn.size} "/>
+        <span hal:text="{images.{image}.details.size}"/>
+      </p>
+
+      <p>
+        <img hal:attribute="src {hal.root}/{default.imgdir}/square.png"
+             alt="."/>
+        <b hal:text=" {locales.{locale}.tradn.detail} "/>
+        <a href="index.html">
+          <img hal:attribute="src {hal.root}/{default.imgdir}/{images.{image}.details.src}-zoom-100.png"
+               hal:attribute="alt {locales.{locale}.tradn.detail}"
+               class="detail"/>
+        </a>
+      </p>
+
+      <!-- not selling stuff til we find a better printers
+      <div hal:erase="" hal:repeat="product images.{image}.{locale}.products">
+        <p>
+          <img hal:attribute="src {hal.root}/{default.imgdir}/square.png"
+               alt="."/>
+          <b hal:text=" {product.type} "/>
+          <span hal:text="{product.details}"/>
+        </p>
+        <p>
+          <img hal:attribute="src {hal.root}/{default.imgdir}/square.png"
+               alt="."/>
+          <b hal:text=" {locales.{locale}.tradn.price} "/>
+          <span hal:text="{product.price}"/>
+        </p>
+      </div>
+      -->
+
+      <div hal:erase="" pan:menulink=""/>
+
+    </td>
+
+    <td rowspan="2" class="pad-40">&nbsp;</td>
+
+    <td rowspan="2" class="text">
+      <a hal:attribute="href {hal.root}/{locales.{locale}.tradn.other-locale}/{image}.html#discussion"
+         hal:textafter="&nbsp;{locales.{locale}.tradn.translate}">
+        <img hal:attribute="src {hal.root}/{default.imgdir}/arrow.png"
+             alt=">"/>
+      </a>
+      <div hal:erase="" 
+           hal:repeat="body images.{image}.{locale}.body"
+           hal:element="p {body}"/>
+      <div hal:erase="" pan:menulink=""/>
+    </td>
+
+    <td rowspan="2" class="top-right">
+      <a name="discussion" id="discussion">&nbsp;</a>
+    </td>
+
+  </tr>
+</table>
+
+  </body>
+</html>

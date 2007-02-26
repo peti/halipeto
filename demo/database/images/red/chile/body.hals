@@ -1,0 +1,14 @@
+falta traducci&oacute;n:
+
+a new, higher resolution, rendition of the first image i created using
+pancito (a package for generating "functional images", implemented in
+<a href="http://www.haskell.org">haskell</a> and available for
+download <a href="http://www.acooke.org/jara/pancito">here</a>).
+
+the intention was to model crumpled paper (a problem i returned to <a
+hal:attribute="href {images.paper.details.src}.html">later</a>), but
+the code contained a number of errors.  since the result was
+attractive, the errors remain.
+
+the attraction is, i think, largely due to the organic nature of the
+image.  too much computer generated art is over-regular and sterile.

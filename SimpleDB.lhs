@@ -1,6 +1,7 @@
 %  
-% Halipeto 1.0 -  Haskell static web page generator 
+% Halipeto 2.0 -  Haskell static web page generator 
 % Copyright 2004 Andrew Cooke (andrew@acooke.org) 
+% Copyright 2007 Peter Simons (simons@cryp.to) 
 %  
 %     This program is free software; you can redistribute it and/or modify 
 %     it under the terms of the GNU General Public License as published by 
@@ -41,20 +42,20 @@ insensitive.
 
 The main disadvantage of the SimpleDB implementation, to my mind, is
 that there is no formal specification of the structure that verifies
-that the information in related drectories is consistent.  Nothing
+that the information in related directories is consistent.  Nothing
 warns the user that the second image directory is missing a
 details.haldx file, for example.  This could be fixed, but it's
 difficult to find the energy to make a ``quick fix'' better.  A full
 SQL interface should be developed instead.
 
 \begin{code}
-module SimpleDB (
+module Halipeto.SimpleDB (
   Translate, noCVS, allFiles, ReadDB, addDefaultsDB, readDB, readDB'
 ) where
 
-import Template
-import Dictionary
-import Utilities
+import Halipeto.Template
+import Halipeto.Dictionary
+import Halipeto.Utilities
 import IO
 import Directory
 import Monad
@@ -199,7 +200,7 @@ splitLine tr ky txt =
 keyVal :: String -> Maybe ([String], String)
 keyVal s = keyVal' "" $ dropSpace s
   where
-    keyVal' k ""                = Nothing
+    keyVal' _ ""                = Nothing
     keyVal' k (c:s) | isSpace c = Just (fromDot k, dropSpace s)
                     | otherwise = keyVal' (k ++ [c]) s
 \end{code}

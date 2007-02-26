@@ -1,0 +1,20 @@
+a map of military spending, by country.
+
+the size of each ellipse is proportional to the amount of money spent.
+the colour reflects the fraction of gdp.  so a white country is
+spending much more per person than a red country.
+
+the projection is pretty standard - to get oriented, identify africa
+from the general distribution of small dots in the centre of the
+image.  the largest ellipse, top left, is the usa.  the yellow ellipse
+bottom left is chile (where the military is funded directly from a
+sales tax on copper, our main export), the central white area is
+israel and the top right white state is north korea.
+
+the scale shows the (quarter) ellipse sizes for 1, 10 and 100 billion
+usa dollars per year; the colour bar ranges from 0 to 10% of gdp
+(n korea is way off the scale at around 20%).
+
+for more information, and downloads, see <a
+href="../../andrew/diary/2005/mar/19.html">this diary entry</a>.
+

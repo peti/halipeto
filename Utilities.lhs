@@ -1,6 +1,7 @@
 %  
-% Halipeto 1.0 -  Haskell static web page generator 
+% Halipeto 2.0 -  Haskell static web page generator 
 % Copyright 2004 Andrew Cooke (andrew@acooke.org) 
+% Copyright 2007 Peter Simons (simons@cryp.to) 
 %  
 %     This program is free software; you can redistribute it and/or modify 
 %     it under the terms of the GNU General Public License as published by 
@@ -29,7 +30,7 @@
 Various general routines.
 
 \begin{code}
-module Utilities (
+module Halipeto.Utilities (
   slash, toSlash, fromSlash, toSep, fromSep, dropSpace,
   mapT2, mapT3,
   thenMaybe
@@ -41,6 +42,7 @@ import Char
 Concatenation of paths and files.
 
 \begin{code}
+slash' :: Char
 slash' = '/'
 \end{code}
 %%Haddock: Concatenate two directories
@@ -66,13 +68,14 @@ Separation and expansion of strings.
 %%Haddock: Join a list with a given separator character
 \begin{code}
 toSep :: Char -> [String] -> String
-toSep sep [s]    = s
+toSep  _  []     = undefined
+toSep  _  [s]    = s
 toSep sep (s:ss) = s ++ [sep] ++ toSep sep ss
 \end{code}
 %%Haddock: Split a list on a given separator character
 \begin{code}
 fromSep :: Char -> String -> [String]
-fromSep sep s = uncurry (:) $ foldr f ("", []) s
+fromSep sep s' = uncurry (:) $ foldr f ("", []) s'
   where
     f c (s, l) | c == sep && l == [] && s == "" = ("", l)
                | c == sep                       = ("", s:l)

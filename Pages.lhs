@@ -1,6 +1,7 @@
 %  
-% Halipeto 1.0 -  Haskell static web page generator 
+% Halipeto 2.0 -  Haskell static web page generator 
 % Copyright 2004 Andrew Cooke (andrew@acooke.org) 
+% Copyright 2007 Peter Simons (simons@cryp.to) 
 %  
 %     This program is free software; you can redistribute it and/or modify 
 %     it under the terms of the GNU General Public License as published by 
@@ -31,19 +32,18 @@ A website is a collection of related pages.  The code here fixes these
 relationships, relating page names, directories and templates.
 
 \begin{code}
-module Pages (
+module Halipeto.Pages (
   PageGen, PageGenS, idD, page, noPage, append, repeat, leafP, foldT,
   setSiteDetails, generate,
   menuClass, menuClass', Label, Collect, baseMenu, listMenu
 ) where
 
 import Prelude hiding (repeat, all)
-import Template
-import Dictionary
-import Utilities
-import FromHaxml.Parse
-import FromHaxml.Pretty
-import FromHaxml.Types
+import Halipeto.Template
+import Halipeto.Dictionary
+import Halipeto.Utilities
+import Text.XML.HaXml.Pretty
+import Text.XML.HaXml.Types
 import Maybe
 import IO
 import Monad
@@ -195,9 +195,9 @@ repeat to frm pg dct dc0 = repeat' to' frm (children' dct frm') pg dct dc0
 
 repeat' :: SubDictionary s => 
   String -> String -> [s String] -> PageGen s -> PageGenS s
-repeat' to frm [] pg dct dc0 = error $ "nothing to repeat for " ++ frm ++
+repeat' _  frm [] _  dct  _  = error $ "nothing to repeat for " ++ frm ++
                                           "\n" ++ (show $ contents dct)
-repeat' to frm ch pg dct dc0 = foldr f [] ch
+repeat' to  _  ch pg dct dc0 = foldr f [] ch
   where
     f ch pgs = (pg (adopt' dct (to, ch)) dc0):pgs
 \end{code}
@@ -242,7 +242,7 @@ generate ctx = do foldT (generate' ctx) (do return ()) (site ctx)
 
 generate' :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
   Context s f -> Maybe (Page s) -> IO () -> IO ()
-generate' ctx Nothing prv = prv
+generate'  _  Nothing prv = prv
 generate' ctx (Just pg) prv =
     do putStrLn $ "generating " ++ htmlPath ++ " from " ++ tmplPath
        tmpl <- readTemplate tmplPath
@@ -301,7 +301,7 @@ checkDir' pth = foldl f (do return "") pth
 
 allButOne :: [a] -> [a]
 allButOne []     = [] -- or error
-allButOne [x]    = []
+allButOne [_]    = []
 allButOne (x:xs) = x:(allButOne xs)
 \end{code}
 
@@ -338,7 +338,7 @@ baseMenu col ste dct lab = foldT (baseNode col dct lab) [] ste
 
 baseNode :: Collect -> s String -> Label s
   -> Maybe (Page s) -> [Element] -> [Element]
-baseNode col dct lab Nothing   rows = rows
+baseNode  _   _   _  Nothing   rows = rows
 baseNode col dct lab (Just pg) rows =
     case lab dct' pg of
       Nothing  -> rows

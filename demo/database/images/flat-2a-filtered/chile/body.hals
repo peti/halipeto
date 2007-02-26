@@ -1,0 +1,15 @@
+falta traducci&oacute;n:
+
+part of the motivation here was to produce monochrome works that i can
+print more easily.
+
+the underlying svg mosaic of triangles (selected, as before, from
+those with all possible connections for the two points on each side)
+was generated at random using a python script.
+
+i then hand-edited the svg to colour a connected path (breaking the
+relevant triangles into their consitutent paths and chaging the stroke
+property as appropriate).
+
+finally, i used the gimp to add noise, almost obscuring this
+greyed-out section.
