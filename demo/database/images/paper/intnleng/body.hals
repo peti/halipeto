@@ -1,0 +1,19 @@
+this image is the most computationally intensive presented here,
+needing three or four days calculation on a fairly fast pc.
+
+it was necessary to structure the code so that a small fragment of the
+image could be generated in much less time, allowing details to be
+refined without waiting days to see the result of each change.
+
+this is difficult to implement in most programming languages, because
+the final shading, which reflects the attitude of the paper at each
+point, depends on the cumulative effect of all the creases in the
+image.  "local" shading is calculated from "global" information,
+making it difficult to define exactly what calculations are required
+for any particular sub-image.
+
+however, <a href="http://www.haskell.org">haskell</a> - the language
+used to describe the image - is "lazy".  this means that the
+mathematical relationships underlying the whole image can be provided
+to the computer, but only the information strictly necessary to
+calculate the sub-image is evaluated.

@@ -1,6 +1,7 @@
 %  
-% Halipeto 1.0 -  Haskell static web page generator 
+% Halipeto 2.0 -  Haskell static web page generator 
 % Copyright 2004 Andrew Cooke (andrew@acooke.org) 
+% Copyright 2007 Peter Simons (simons@cryp.to) 
 %  
 %     This program is free software; you can redistribute it and/or modify 
 %     it under the terms of the GNU General Public License as published by 
@@ -24,7 +25,6 @@
 % originate from the FromHaxml module (so that install on Win32 is 
 % easy). 
 %  
-
 
 \section{Demonstration}
 
@@ -185,12 +185,12 @@ import Prelude hiding (repeat, all)
 import Utilities
 import SimpleDB
 import Dictionary
-import FromHaxml.Pretty
+import Text.XML.HaXml.Types
 import Template
 import Functions hiding (repeat)
 import Pages
 import Maybe
-import FromHaxml.Types
+
 import System.IO.Unsafe
 \end{code}
 
@@ -213,9 +213,6 @@ We use a case insensitive dictionary (emptyNC) for the functions
 because case is insignificant in XML attribute names (I believe).
 
 \begin{code}
-demo :: Bool
-demo = False
-
 main :: IO ()
 main = buildPancitoSite "./demo/database" "./demo/pancito" "./demo/templates"
 	 
@@ -265,7 +262,7 @@ byGroup (dct, col, mx) chld = (dct', col+1, mx'')
   where
     (dct', mx') = foldl (byImage grp col) (dct, 1) $ children dct pth
     mx'' = max mx mx'
-    grp = fromJust $ search' chld ""
+    grp = fromJust' "missing child group" $ search' chld ""
     pth = ["groups", grp, "images"]
 
 byImage :: SubDictionary s => 
@@ -275,7 +272,7 @@ byImage grp col (dct, row) chld = (dct', row+1)
     dct' = addAll dct [(pth ++ ["group"], grp),
                        (pth ++ ["image"], img)]
     pth = ["table", show row, show col]
-    img = fromJust $ search' chld ""
+    img = fromJust' "missing child image" $ search' chld ""
 
 pad :: SubDictionary s => (s String, Int, Int) -> s String
 pad (dct, mxcol, mxrow) =
@@ -309,9 +306,13 @@ tableMenu ste dct lab = Elem "table" menuClass (map CElem rows)
   where
     rows = baseMenu (++) ste dct lab
 
-mkRow :: [Element] -> [Element]
-mkRow els = [Elem "tr" menuClass 
-              [CElem $ Elem "td" menuClass (map CElem els)]]
+mkRow :: [Content] -> [Content] -> [Element]
+mkRow ims cnt = [Elem "tr" menuClass
+                  [CElem $ Elem "td" [] 
+                    [CElem $ Elem "table" [] 
+                      [CElem $ Elem "tr" []
+                        [CElem $ Elem "td" menuClass ims,
+                         CElem $ Elem "td" menuClass cnt]]]]]
 
 menu :: (SubDictionary s, Dictionary f (CustomFn s f)) => CustomFn s f
 menu ctx arg = 
@@ -332,6 +333,10 @@ whichTempl "order.html"        = ORD
 whichTempl "image.html"        = IMG
 whichTempl _                   = error "unexpected template"
 
+fromJust' :: String -> Maybe a -> a
+fromJust' msg (Just val) = val
+fromJust' msg Nothing    = error msg
+
 label :: SubDictionary s => Label s
 label dct pg =
     case whichTempl $ template pg of
@@ -342,69 +347,83 @@ label dct pg =
       LOC -> 
         if typ == LOC && lcl == Just lcl'
           then 
-            Just $ mkRow [Elem "span" menuClass (sqr 1 ++ [CString True txt])]
+            Just $ mkRow (sqr 1) [CString True txt]
           else 
-            Just $ mkRow [Elem "a" [menuClass', ("href", AttValue [Left lnk])]
-                           (aro 1 ++ [CString True txt])]
+            Just $ mkRow (aro 1) 
+                     [CElem $ Elem "a" [menuClass', 
+                                        ("href", AttValue [Left lnk])]
+                                       [CString True txt]]
           where
-            txt = fromJust $ search dct ["locales", lcl', "tradn", lcl']
+            txt = fromJust' "missing locale" 
+                    $ search dct ["locales", lcl', "tradn", lcl']
 
       GRP ->
         if typ == GRP && lcl == Just lcl' && grp == Just grp'
           then 
-            Just $ mkRow [Elem "span" menuClass (sqr 2 ++ [CString True grp'])]
+            Just $ mkRow (sqr 2) [CString True grp'']
           else if lcl == Just lcl' || (grp == Just grp' && typ == IMG)
-                 then Just $ mkRow [Elem "a" [menuClass', 
+                 then Just $ mkRow (aro 2)
+                               [CElem $ Elem "a" 
+                                             [menuClass', 
                                               ("href", AttValue [Left lnk])]
-                                             (aro 2 ++ [CString True grp'])]
+                                             [CString True grp'']]
                  else Nothing
 
       IMG ->
         if typ == IMG && lcl == Just lcl' && 
              grp == Just grp'&& img == Just img'
-          then Just $ 
-            (mkRow [Elem "span" menuClass (sqr 3 ++ [CString True txt])])
-            ++ imageMenu
+          then Just $ (mkRow (sqr 3) [CString True txt]) ++ imageMenu
           else if lcl == Just lcl' && grp == Just grp'
-                 then Just $ mkRow [Elem "a" [menuClass', 
+                 then Just $ mkRow (aro 3)
+                               [CElem $ Elem "a" 
+                                             [menuClass', 
                                               ("href", AttValue [Left lnk])]
-                                             (aro 3 ++ [CString True txt])]
+                                             [CString True txt]]
                  else if grp == Just grp' && img == Just img'
-                        then Just $ mkRow 
-                               [Elem "a" [menuClass', 
-                                          ("href", AttValue [Left lnk])]
-                                         (aro 3 ++ [CString True txt])]
+                        then Just $ mkRow (aro 3)
+                               [CElem $ Elem "a" 
+                                             [menuClass', 
+                                              ("href", AttValue [Left lnk])]
+                                             [CString True txt]]
                         else Nothing
           where
-            txt = fromJust $ search dct ["images", img', "details", "title"]
+            txt = fromJust' "missing title"
+                    $ search dct ["images", img', "details", "title"]
 
       ORD ->
         if typ == ORD && lcl == Just lcl'
-          then Just $ 
-            (mkRow [Elem "span" menuClass (sqr 2 ++ [CString True txt])])
-            ++ orderMenu
+          then Just $ (mkRow (sqr 2) [CString True txt]) ++ orderMenu
           else if lcl == Just lcl'
-            then Just $ mkRow [Elem "a" [menuClass', 
-                                         ("href", AttValue [Left lnk])]
-                                        (aro 2 ++ [CString True txt])]
+            then Just $ mkRow (aro 2) 
+                          [CElem $ Elem "a" [menuClass', 
+                                             ("href", AttValue [Left lnk])]
+                                            [CString True txt]]
             else Nothing
           where
-            txt = fromJust $ search dct ["locales", lcl', "tradn", "order"]
+            txt = fromJust' "missing order"
+                    $ search dct ["locales", lcl', "tradn", "order"]
 
   where
-    typ = whichTempl . fromJust $ search dct [hal, "template"]
+    typ = whichTempl . fromJust' "missing template" 
+                         $ search dct [hal, "template"]
     lcl = search dct ["locale"]
-    lcl' = fromJust $ search dct [hal, "menu", "locale"] 
+    lcl' = fromJust' "missing menu locale" 
+             $ search dct [hal, "menu", "locale"] 
     grp = search dct ["group"]
-    grp' = fromJust $ search dct [hal, "menu", "group"] 
+    grp' = fromJust' "missing menu group" 
+             $ search dct [hal, "menu", "group"] 
+    grp'' = fromJust' ("missing menu name: " ++ grp')
+              $ search dct ["groups", "names", grp'] 
     img = search dct ["image"]
-    img' = fromJust $ search dct [hal, "menu", "image"] 
-    lnk = (fromJust $ search dct [hal, "root"]) `slash` (toSlash $ path pg)
-    aro n = nbsp:(imgList "arrow.png" ">" dct n)
-    sqr n = nbsp:(imgList "square.png" "." dct n)
+    img' = fromJust' "missing menu image"
+             $ search dct [hal, "menu", "image"] 
+    lnk = (fromJust' "missing root" $ search dct [hal, "root"]) 
+            `slash` (toSlash $ path pg)
+    aro n = imgList "arrow.png" ">" dct n
+    sqr n = imgList "square.png" "." dct n
     orderMenu = map mkRow' cols
       where
-        cols = map (fromJust . flip search [""])
+        cols = map (fromJust' "missing child" . flip search [""])
                    (children dct ["order-list"])
         mkRow' key = Elem "tr" menuClass 
                        [CElem $ Elem "td" menuClass
@@ -415,20 +434,10 @@ label dct pg =
                              [CString True 
                                (substitute dct $ "{locales.{locale}.tradn." 
                                                  ++ key ++ "}")])]]
-    imageMenu = mkRow $ parseElements $
+    imageMenu = mkRow (aro 4) $ map CElem (parseElements $
         "<a hal:attribute='href #discussion'"++
-           "hal:textAfter='&nbsp;{locales.{locale}.tradn.discussion}'>"++
-           "&nbsp;"++
-           "<img hal:attribute='src {hal.root}/{default.imgdir}/arrow.png'"++
-               " alt='>'/>"++
-           "<img hal:attribute='src {hal.root}/{default.imgdir}/arrow.png'"++
-               " alt='>'/>"++
-           "<img hal:attribute='src {hal.root}/{default.imgdir}/arrow.png'"++
-               " alt='>'/>"++
-           "<img hal:attribute='src {hal.root}/{default.imgdir}/arrow.png'"++
-               " alt='>'/>"++
-           "&nbsp;"++
-         "</a>"
+           "hal:textAfter='{locales.{locale}.tradn.discussion}'>"++
+         "</a>")
    
 
 imgList :: SubDictionary s => String -> String -> s String -> Int -> [Content]
@@ -450,7 +459,7 @@ menuLink =
     mkElements Before $ 
       "<p class='menulink'>"++
         "<a hal:attribute='href #menu'"++
-           "hal:text='&nbsp;{locales.{locale}.tradn.menu}'>"++
+           "hal:text='{locales.{locale}.tradn.menu}'>"++
            "&nbsp;"++
            "<img hal:attribute='src {hal.root}/{default.imgdir}/worra.png'" ++
                " alt='&lt;'/>"++

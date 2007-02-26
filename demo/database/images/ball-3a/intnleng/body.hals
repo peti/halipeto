@@ -1,0 +1,18 @@
+i guess it's obvious, but if you cut this out, score along the edges
+of the triangles, and stick the tags to the appropriate places, you
+get a dodecahedron.
+
+this started as a project exploring possible lampshade designs (we do
+not have a camo dodecahedron as a lampshade, though - at least, not
+yet).
+
+thinking about how to decorate such a shape, i listed the different
+triangles possible if two points on each edge were connected (one
+point per edge doesn't work too well) and then described them in
+svg (easy using bicubic spline paths).  these were assembled using a
+tiny xsl-based language for constructing regular patterns described <a
+href="../../andrew/diary/2005/apr/5.html">here</a>.
+
+the colouring came later once i'd built a couple of monochrome designs
+(this particular shape isn't a regular dodecahedron - the "top" and
+"bottom" are squashed, giving a slighty disk-like feel).

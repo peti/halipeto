@@ -1,6 +1,7 @@
 %  
-% Halipeto 1.0 -  Haskell static web page generator 
+% Halipeto 2.0 -  Haskell static web page generator 
 % Copyright 2004 Andrew Cooke (andrew@acooke.org) 
+% Copyright 2007 Peter Simons (simons@cryp.to) 
 %  
 %     This program is free software; you can redistribute it and/or modify 
 %     it under the terms of the GNU General Public License as published by 
@@ -32,7 +33,7 @@ the basic data structures used elsewhere (to avoid circular module
 references).
 
 \begin{code}
-module Template (
+module Halipeto.Template (
   CustomFn, Result (Attr, Text, Xml, Repeat, Continue, Skip),
   Position (Before, After, Replace), hal,
   UpdateDict, Page (Page), TreeSite (TreeSite), path, template, dictionary,
@@ -44,11 +45,9 @@ module Template (
 \begin{code}
 import Maybe
 import Char
-import Dictionary
-import Utilities
-import FromHaxml.Types
-import FromHaxml.Parse
-import FromHaxml.Pretty
+import Halipeto.Dictionary
+import Text.XML.HaXml.Parse
+import Text.XML.HaXml.Types
 \end{code}
 
 \subsection{Context}
@@ -210,7 +209,7 @@ sub-structure may itself change each iteration).
 \begin{code}
 evalElement :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
   Context s f -> Element -> IO Element
-evalElement ctx e@(Elem nm at cn) = 
+evalElement ctx e@(Elem _ _ _) =
     evalAttributes ctx evalContents e []
 \end{code}
 
@@ -291,11 +290,11 @@ evalFunction ctx nxt (Elem nm at cn) at' f val =
          Text p s  -> 
            case p of
              Before  -> evalAttributes ctx' nxt 
-                          (Elem nm at ([CString True s]++cn)) at'
+                          (Elem nm at ([CString False s]++cn)) at'
              After   -> evalAttributes ctx' nxt 
-                          (Elem nm at (cn++[CString True s])) at'
+                          (Elem nm at (cn++[CString False s])) at'
              Replace -> evalAttributes ctx' nxt 
-                          (Elem nm at [CString True s]) at'
+                          (Elem nm at [CString False s]) at'
          Xml p e  -> 
            case p of
              Before  -> evalAttributes ctx' nxt 
@@ -304,7 +303,7 @@ evalFunction ctx nxt (Elem nm at cn) at' f val =
                           (Elem nm at (cn++(map CElem e))) at'
              Replace -> evalAttributes ctx' nxt 
                           (Elem nm at (map CElem e)) at'
-         Repeat f  -> loopAttribute ctx' (Elem nm at cn) at' f val
+         Repeat f' -> loopAttribute ctx' (Elem nm at cn) at' f' val
          Continue  -> evalAttributes ctx' nxt (Elem nm at cn) at'
          Skip      -> evalAttributes ctx' skip (Elem nm [] []) at'
 
@@ -314,7 +313,7 @@ skip _ e = do return e
 loopAttribute :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
   Context s f -> Element -> [Attribute] -> CustomFn s f -> String 
   -> IO Element
-loopAttribute ctx e@(Elem nm at cn) at1 f val =
+loopAttribute ctx e@(Elem nm _ _) at1 f val =
     do (Elem _ at2 cn2) <- evalAttributes ctx evalContents e []  -- first
        (Elem _ at3 cn3) <- evalFunction ctx skip e [] f val      -- remain
        return $ Elem nm (joinAtts at1 at2 at3) (cn2++cn3)
@@ -346,9 +345,9 @@ The following code generates HTML from a template.
 \begin{code}
 evalDocument :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
   Context s f -> Document -> IO Document
-evalDocument ctx (Document p st elt) = 
+evalDocument ctx (Document p st elt msc) =
     do elt' <- evalElement ctx elt
-       return $ erase $ Document p st elt'
+       return $ erase $ Document p st elt' msc
 \end{code}
 
 \subsection{Removing Elements}
@@ -380,7 +379,7 @@ that has always been possible) --- is this a problem?
 
 \begin{code}
 erase :: Document -> Document
-erase (Document p st elt) = Document p st $ eraseChildren elt
+erase (Document p st elt msc) = Document p st (eraseChildren elt) msc
 
 eraseChildren :: Element -> Element
 eraseChildren (Elem nm at cn) = Elem nm at $ foldl eraseContent [] cn
@@ -409,12 +408,17 @@ HaXml, convert the attribute value to a string before the custom
 function is called.
 
 \begin{code}
+attVal :: AttValue -> [Char]
 attVal (AttValue esr) = concatMap (either id reference) esr
 
+reference :: Reference -> [Char]
 reference (RefEntity er) = entityref er
 reference (RefChar cr)   = charref cr
 
+entityref :: EntityRef -> [Char]
 entityref n = "&" ++ show n ++ ";"
-charref c = "&" ++ c ++ ";"
+
+charref :: CharRef -> [Char]
+charref c = "&" ++ show c ++ ";"
 \end{code}
 

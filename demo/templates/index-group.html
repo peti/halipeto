@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!--
+
+Halipeto 2.0 -  Haskell static web page generator
+Copyright 2004 Andrew Cooke (andrew@acooke.org)
+Copyright 2007 Peter Simons (simons@cryp.to)
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+EXCEPT
+
+Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml -
+see the COPYRIGHT and LICENSE in that directory.  The files included
+are a subset of the full HaXml distribution and have been modified to
+originate from the FromHaxml module (so that install on Win32 is
+easy).
+
+-->
+  <head hal:textafter="{png-root}">
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+    <title hal:text="pancito - {group}"/>
+    <link type="text/css" rel="stylesheet"
+          hal:attribute="href {hal.root}/{default.cssdir}/pancito.css"/>
+   </head>
+  <body>
+
+<table class="fixed">
+
+  <tr>
+
+    <td class="navigation" rowspan="2">
+      <a hal:attribute="href {hal.root}/index.html">
+        <img hal:attribute="src {hal.root}/{default.imgdir}/logo.png"
+             alt="pancito"/>
+      </a>
+      <div pan:menu=""/>
+    </td>
+
+    <td class="pad-50" rowspan="2">&nbsp;</td>
+
+    <td>&nbsp;</td>
+
+  </tr>
+
+  <tr>
+    <td>
+      <table>
+        <tr>
+          <div hal:erase="" hal:repeat="image groups.{group}.images">
+            <td class="hidden">
+              <a class="image" hal:attribute="href {image}.html">
+                <img hal:attribute="src {hal.root}/{default.imgdir}/{image}-100.png"
+                     hal:attribute="alt {images.{image}.details.title}"/>
+              </a>
+            </td>
+            <td class="pad-40">&nbsp;</td>
+          </div>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+  </body>
+</html>

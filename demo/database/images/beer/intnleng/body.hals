@@ -1,0 +1,7 @@
+the sketches are scanned, producing a bitmap file.  potrace then
+transforms this back into the lines that formed the original drawing.
+from this (vector based) description an arbitrarily large image can be
+generated without any pixel jaggies.
+
+magnified images are montaged together using graphicsmagick and,
+finally, the gimp is used to add a colour wash.

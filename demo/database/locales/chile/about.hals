@@ -1,0 +1,19 @@
+falta traducci&oacute;n
+
+this site was generated using halipeto - a system i developed, in
+haskell, for generating web sites.  it separates content, structure,
+and presentation.
+
+the format of the different pages is defined using templates.  the
+content - the text and images - are stored in a simple database.  the
+arrangement of the pages and details specific to this particular site
+(like the way the menu is generated) are implemented as small
+functions in haskell.
+
+halipeto is free (under the gpl).  you can download it <a
+href="http://www.acooke.org/jara/halipeto">here</a>. a reduced version
+of this site is included in the package as an example.
+
+i am interested in doing more web development - please <a
+href="mailto:andrew@acooke.org">contact me</a> if you have something
+that you think might be interesting.
