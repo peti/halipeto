@@ -1,0 +1,28 @@
+Name:           halipeto
+Version:        2.1
+Cabal-Version:  >= 1.2
+License:        GPL
+License-File:   COPYING
+Copyright:      (c) 2004-2008 Andrew Cooke (andrew@acooke.org)
+                (c) 2007-2008 Peter Simons (simons@cryp.to)
+Author:         Andrew Cooke (andrew@acooke.org)
+Maintainer:     Peter Simons (simons@cryp.to)
+Stability:      beta
+Homepage:       http://www.acooke.org/jara/halipeto/
+Package-URL:    http://www.acooke.org/jara/halipeto/halipeto-2-1.tgz
+Category:       Text
+Tested-With:    GHC
+Synopsis:       Haskell Static Web Page Generator
+Description:    Generate static HTML pages.
+
+Library
+  Exposed-Modules:      Halipeto.Dictionary,
+                        Halipeto.Functions,
+                        Halipeto.Pages,
+                        Halipeto.SimpleDB,
+                        Halipeto.Template,
+                        Halipeto.Utilities
+  Ghc-Options:          -O2
+  Build-Depends:        base, haskell98, HaXml, directory
+  Extensions:           MultiParamTypeClasses,
+                        FlexibleInstances, FlexibleContexts
