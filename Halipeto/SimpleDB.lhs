@@ -1,30 +1,30 @@
-%  
-% Halipeto 2.0 -  Haskell static web page generator 
-% Copyright 2004 Andrew Cooke (andrew@acooke.org) 
-% Copyright 2007 Peter Simons (simons@cryp.to) 
-%  
-%     This program is free software; you can redistribute it and/or modify 
-%     it under the terms of the GNU General Public License as published by 
-%     the Free Software Foundation; either version 2 of the License, or 
-%     (at your option) any later version. 
-%  
-%     This program is distributed in the hope that it will be useful, 
-%     but WITHOUT ANY WARRANTY; without even the implied warranty of 
-%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-%     GNU General Public License for more details. 
-%  
-%     You should have received a copy of the GNU General Public License 
-%     along with this program; if not, write to the Free Software 
-%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
-%  
-% EXCEPT 
-%  
-% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml - 
-% see the COPYRIGHT and LICENSE in that directory.  The files included 
-% are a subset of the full HaXml distribution and have been modified to 
-% originate from the FromHaxml module (so that install on Win32 is 
-% easy). 
-%  
+%
+% Halipeto 2.0 -  Haskell static web page generator
+% Copyright 2004 Andrew Cooke (andrew@acooke.org)
+% Copyright 2007 Peter Simons (simons@cryp.to)
+%
+%     This program is free software; you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation; either version 2 of the License, or
+%     (at your option) any later version.
+%
+%     This program is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+%
+%     You should have received a copy of the GNU General Public License
+%     along with this program; if not, write to the Free Software
+%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%
+% EXCEPT
+%
+% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml -
+% see the COPYRIGHT and LICENSE in that directory.  The files included
+% are a subset of the full HaXml distribution and have been modified to
+% originate from the FromHaxml module (so that install on Win32 is
+% easy).
+%
 
 \section{Simple Database}
 
@@ -53,9 +53,11 @@ module Halipeto.SimpleDB (
   Translate, noCVS, allFiles, ReadDB, addDefaultsDB, readDB, readDB'
 ) where
 
+import Prelude hiding (readList)
 import Halipeto.Template
 import Halipeto.Dictionary
 import Halipeto.Utilities
+import Text.Pandoc
 import IO
 import Directory
 import Monad
@@ -174,7 +176,7 @@ readHaldx tr dct fp ky = do h <- openFile fp ReadMode
 
 readLines :: Dictionary d String =>
   Handle -> Translate -> d String -> [String] -> IO (d String)
-readLines h tr dct ky = 
+readLines h tr dct ky =
   do done <- hIsEOF h
      if done
        then return $ dct
@@ -190,7 +192,7 @@ dropWindowsReturn (c:s) | c == '\r' = dropWindowsReturn s
 			| otherwise = c:(dropWindowsReturn s)
 
 splitLine :: Translate -> [String] -> String -> Maybe ([String], String)
-splitLine tr ky txt = 
+splitLine tr ky txt =
   case keyVal txt of
     Nothing     -> Nothing
     Just (k, v) -> case tr $ ky ++ k of
@@ -224,9 +226,12 @@ type ReadDB d = Translate -> d String -> FilePath -> [String] -> IO (d String)
 \begin{code}
 addDefaultsDB :: (Dictionary d String, Dictionary r (ReadDB d)) =>
   r (ReadDB d) -> r (ReadDB d)
-addDefaultsDB d = addAll' d [(hal,       readHal),
-                             (hal++"s",  readHals),
-                             (hal++"dx", readHaldx)]
+addDefaultsDB d = addAll' d [ (hal,       readHal)
+                            , (hal++"s",  readHals)
+                            , (hal++"dx", readHaldx)
+                            , ("rst",     readRstMsg)
+                            , ("lst",     readList)
+                            ]
 \end{code}
 
 \subsection{Translation}
@@ -289,7 +294,7 @@ readDB d tr dc dr = readFP d (safety `thenMaybe` tr) dc dr []
 
 readFP :: (Dictionary d String, Dictionary r (ReadDB d)) =>
   r (ReadDB d) -> ReadDB d
-readFP d tr dct fp ky = 
+readFP d tr dct fp ky =
     do isD <- doesDirectoryExist fp
        if isD
           then readDir d tr dct fp ky $ getDirectoryContents fp
@@ -324,4 +329,42 @@ suffix' :: String -> String -> String
 suffix' x ""                = x
 suffix' x (c:s) | c == '.'  = suffix' s s
                 | otherwise = suffix' x s
+\end{code}
+
+Support for Internet Message style entries.
+
+\begin{code}
+readMessage :: FilePath -> IO ([(String,String)], String)
+readMessage fp = do
+  (header,body) <- fmap (span (not . List.null) . lines) (readFile fp)
+  let headerLinesWords = map (words . concat) (groupBy (\l r -> isSpace (head r)) header)
+      headerLines      = map (\wrds -> (fixKeyword (head wrds), unwords (tail wrds))) headerLinesWords
+      fixKeyword k
+        | ":" `isSuffixOf` k = map toLower $ reverse . tail . reverse $ k
+        | otherwise          = error $ "unknown header keyword " ++ show k ++ " in " ++ fp
+  return (headerLines, unlines . drop 1 $ body)
+\end{code}
+
+Support for ReStructured Text Messages.
+
+\begin{code}
+readRstMsg :: Dictionary d String => Translate -> d String -> FilePath -> [String] -> IO (d String)
+readRstMsg _ dct fp ky = do
+  (header,body) <- readMessage fp
+  let st   = defaultParserState
+      opt  = defaultWriterOptions { writerStrictMarkdown = True }
+      pdoc = readRST st body
+      html = writeHtmlString opt pdoc
+      dct' = foldl (\d (k,v) -> add d (ky ++ [k], v)) dct header
+  return $ add dct' (ky ++ ["body"], html)
+\end{code}
+
+Support for simple entry-by-line lists.
+
+\begin{code}
+readList :: Dictionary d String => Translate -> d String -> FilePath -> [String] -> IO (d String)
+readList _ dct fp ky = do
+  ls <- fmap lines (readFile fp)
+  let dct' = foldl (\d (k,v) -> add d (ky ++ [show k], v)) dct (zip [1..] ls)
+  return $ dct'
 \end{code}
