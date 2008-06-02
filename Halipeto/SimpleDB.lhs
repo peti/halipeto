@@ -230,6 +230,7 @@ addDefaultsDB d = addAll' d [ (hal,       readHal)
                             , (hal++"s",  readHals)
                             , (hal++"dx", readHaldx)
                             , ("rst",     readRstMsg)
+                            , ("mdwn",    readMdwnMsg)
                             , ("lst",     readList)
                             ]
 \end{code}
@@ -354,6 +355,20 @@ readRstMsg _ dct fp ky = do
   let st   = defaultParserState
       opt  = defaultWriterOptions { writerStrictMarkdown = True }
       pdoc = readRST st body
+      html = writeHtmlString opt pdoc
+      dct' = foldl (\d (k,v) -> add d (ky ++ [k], v)) dct header
+  return $ add dct' (ky ++ ["body"], html)
+\end{code}
+
+Support for Markdown Text Messages.
+
+\begin{code}
+readMdwnMsg :: Dictionary d String => Translate -> d String -> FilePath -> [String] -> IO (d String)
+readMdwnMsg _ dct fp ky = do
+  (header,body) <- readMessage fp
+  let st   = defaultParserState
+      opt  = defaultWriterOptions { writerStrictMarkdown = True }
+      pdoc = readMarkdown st body
       html = writeHtmlString opt pdoc
       dct' = foldl (\d (k,v) -> add d (ky ++ [k], v)) dct header
   return $ add dct' (ky ++ ["body"], html)
