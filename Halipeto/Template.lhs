@@ -43,8 +43,8 @@ module Halipeto.Template (
 \end{code}
 
 \begin{code}
-import Maybe
-import Char
+import Data.Maybe
+import Data.Char
 import Halipeto.Dictionary
 import Text.XML.HaXml.Parse
 import Text.XML.HaXml.Types

@@ -43,7 +43,7 @@ import Prelude hiding (repeat)
 import Halipeto.Template
 import Halipeto.Dictionary
 import Halipeto.Utilities
-import Char
+import Data.Char
 import Text.XML.HaXml.Parse
 import Text.XML.HaXml.Types
 \end{code}

@@ -55,9 +55,8 @@ module Halipeto.Dictionary (
 ) where
 
 import Prelude hiding (null)
-import Char
-import List hiding (find, null, partition, insert)
-import Maybe
+import Data.Char
+import Data.List hiding (find, null, partition, insert)
 import Halipeto.Utilities
 \end{code}
 

@@ -44,9 +44,9 @@ import Halipeto.Dictionary
 import Halipeto.Utilities
 import Text.XML.HaXml.Pretty
 import Text.XML.HaXml.Types
-import Maybe
-import IO
-import Monad
+import Data.Maybe
+import System.IO
+import Control.Monad
 import System.Directory
 \end{code}
 

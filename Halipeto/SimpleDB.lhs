@@ -58,11 +58,11 @@ import Halipeto.Template
 import Halipeto.Dictionary
 import Halipeto.Utilities
 import Text.Pandoc
-import IO
-import Directory
-import Monad
-import List
-import Char
+import System.IO
+import System.Directory
+import Control.Monad
+import Data.List
+import Data.Char
 \end{code}
 
 \subsection{File Formats}
@@ -337,7 +337,7 @@ Support for Internet Message style entries.
 \begin{code}
 readMessage :: FilePath -> IO ([(String,String)], String)
 readMessage fp = do
-  (header,body) <- fmap (span (not . List.null) . lines) (readFile fp)
+  (header,body) <- fmap (span (not . Data.List.null) . lines) (readFile fp)
   let headerLinesWords = map (words . concat) (groupBy (\l r -> isSpace (head r)) header)
       headerLines      = map (\wrds -> (fixKeyword (head wrds), unwords (tail wrds))) headerLinesWords
       fixKeyword k

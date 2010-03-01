@@ -36,7 +36,7 @@ module Halipeto.Utilities (
   thenMaybe
 ) where
 
-import Char
+import Data.Char
 \end{code}
 
 Concatenation of paths and files.
