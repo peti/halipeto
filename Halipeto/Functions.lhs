@@ -1,30 +1,30 @@
-%  
-% Halipeto 2.0 -  Haskell static web page generator 
-% Copyright 2004 Andrew Cooke (andrew@acooke.org) 
-% Copyright 2007 Peter Simons (simons@cryp.to) 
-%  
-%     This program is free software; you can redistribute it and/or modify 
-%     it under the terms of the GNU General Public License as published by 
-%     the Free Software Foundation; either version 2 of the License, or 
-%     (at your option) any later version. 
-%  
-%     This program is distributed in the hope that it will be useful, 
-%     but WITHOUT ANY WARRANTY; without even the implied warranty of 
-%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-%     GNU General Public License for more details. 
-%  
-%     You should have received a copy of the GNU General Public License 
-%     along with this program; if not, write to the Free Software 
-%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
-%  
-% EXCEPT 
-%  
-% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml - 
-% see the COPYRIGHT and LICENSE in that directory.  The files included 
-% are a subset of the full HaXml distribution and have been modified to 
-% originate from the FromHaxml module (so that install on Win32 is 
-% easy). 
-%  
+%
+% Halipeto 2.0 -  Haskell static web page generator
+% Copyright 2004 Andrew Cooke (andrew@acooke.org)
+% Copyright 2007 Peter Simons (simons@cryp.to)
+%
+%     This program is free software; you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation; either version 2 of the License, or
+%     (at your option) any later version.
+%
+%     This program is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+%
+%     You should have received a copy of the GNU General Public License
+%     along with this program; if not, write to the Free Software
+%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%
+% EXCEPT
+%
+% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml -
+% see the COPYRIGHT and LICENSE in that directory.  The files included
+% are a subset of the full HaXml distribution and have been modified to
+% originate from the FromHaxml module (so that install on Win32 is
+% easy).
+%
 
 \section{Functions}
 
@@ -58,7 +58,7 @@ final value (usually text).
 %%Haddock: Separate the argument into the expected number of values
 \begin{code}
 split :: Int -> String -> [String]
-split n s = 
+split n s =
     case split' n [] "" (dropSpace s) of
       Just ss -> ss
       Nothing -> error $ "too few arguments (<" ++ (show n) ++ "): " ++ s
@@ -144,19 +144,19 @@ text' pos ctx arg = do return (ctx, Text pos $ substitute (state ctx) arg)
 \end{code}
 %%Haddock: Prepend text to the current element
 \begin{code}
-text :: 
+text ::
   (SubDictionary s, Dictionary f (CustomFn s f)) => CustomFn s f
 text = text' Before
 \end{code}
 %%Haddock: Append text to the current element
 \begin{code}
-textAfter :: 
+textAfter ::
   (SubDictionary s, Dictionary f (CustomFn s f)) => CustomFn s f
 textAfter = text' After
 \end{code}
 %%Haddock: Replace text to the current element
 \begin{code}
-textReplace :: 
+textReplace ::
   (SubDictionary s, Dictionary f (CustomFn s f)) => CustomFn s f
 textReplace = text' Replace
 \end{code}
@@ -189,11 +189,11 @@ repeat ctx arg = repeat' nm vals ctx ""
     [nm, val] = parse dct 2 arg
     vals = children' dct val
 
-repeat' :: (SubDictionary s, Dictionary f (CustomFn s f)) => 
+repeat' :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
   String -> [s String] -> CustomFn s f
 repeat' p []     ctx _ = do putStrLn $ "end of repeat: " ++ p
                             return (ctx, Skip)
-repeat' p (s:ss) ctx _ = do putStrLn $ "repeat: " ++ p ++ ": " ++ 
+repeat' p (s:ss) ctx _ = do putStrLn $ "repeat: " ++ p ++ ": " ++
                               (show (contents s))
                             return (ctx', Repeat $ repeat' p ss)
   where
@@ -218,7 +218,7 @@ eq  ctx arg = eq' ctx True  $ parse (state ctx) 2 arg
 neq :: (SubDictionary s, Dictionary f (CustomFn s f)) => CustomFn s f
 neq ctx arg = eq' ctx False $ parse (state ctx) 2 arg
 
-eq' :: (SubDictionary s, Dictionary f (CustomFn s f)) => 
+eq' :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
   Context s f -> Bool -> [String] -> IO (Context s f, Result s f)
 eq' ctx x (a:[b]) = do return $ (ctx, if x `xor` (a /= b)
                                         then Continue
@@ -258,7 +258,7 @@ parseElement elt txt = fromDoc $ xmlParse txt txt'
 mkElements :: Position -> String -> CustomFn s f
 mkElements pos txt ctx _ = do return (ctx, Xml pos (parseElements txt))
 \end{code}
-%%Haddock: Generate a function that inserts XML parsed from text, 
+%%Haddock: Generate a function that inserts XML parsed from text,
 %%Haddock: within an element
 \begin{code}
 mkElement :: Position -> String -> String -> CustomFn s f
@@ -281,7 +281,7 @@ text = hello <a hal:attribute="href {link}">world</a>
 
 %%Haddock: A custom function for inserting XHTML
 \begin{code}
-xhtml :: (SubDictionary s, Dictionary f (CustomFn s f)) => 
+xhtml :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
   Position -> CustomFn s f
 xhtml pos ctx txt = do return (ctx, Xml pos (parseElements txt'))
   where
@@ -303,7 +303,7 @@ text = hello <a hal:attribute="href {link}">world</a>
 
 %%Haddock: A custom function for inserting XHTML within an element
 \begin{code}
-element :: (SubDictionary s, Dictionary f (CustomFn s f)) => 
+element :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
   Position -> CustomFn s f
 element pos ctx txt = do return (ctx, Xml pos [parseElement tag txt''])
   where
@@ -323,7 +323,7 @@ under the hal namespace.
 
 %%Haddock: Add standard functions to a dictionary
 \begin{code}
-addDefaultsFn :: (SubDictionary s, Dictionary f (CustomFn s f)) => 
+addDefaultsFn :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
   f (CustomFn s f) -> f (CustomFn s f)
 addDefaultsFn fn = addAll fn fns
   where

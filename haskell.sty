@@ -7,19 +7,19 @@
 % listings package (and the geometry, titlesec and graphicx packages if
 % you include the code below that sets up a particular page style),
 % supports mixing Latex and Haskell.
-% 
+%
 % These packages are present on my machine as part of tetex (which is
 % provided by the Debian/testing distribution).
-% 
+%
 % Haskell already supports a literate programming style.  If you put
 % Haskell code into a file that ends in ``.lhs'' then the contents will
 % be ignored except for anything between \begin{code} and \end{code}.
-% 
+%
 % All that I do below is add the glue to make this invoke the
 % appropriate actions in the listings package when Latex processes the
 % file.  This takes the code inside the code block and formats it
 % nicely.
-% 
+%
 % For examples, see http://www.andrewcooke.free-online.co.uk/jara/pancito
 
 
@@ -48,13 +48,13 @@
   flexiblecolumns=false,
   basewidth={0.5em,0.45em},
   % The following replace compound charcters like ->
-  % Something is missing - someone kindly sent me an email which 
+  % Something is missing - someone kindly sent me an email which
   % I've lost - but it's obvious how to add more.
   literate={-}{{$-$}}1 {+}{{$+$}}1 {/}{{$/$}}1 {*}{{$*$}}1 {=}{{$=$}}1
-           {>}{{$>$}}1 {<}{{$<$}}1 
+           {>}{{$>$}}1 {<}{{$<$}}1
            {->}{{$\rightarrow$}}2 {>=}{{$\geq$}}2 {<-}{{$\leftarrow$}}2
            {<=}{{$\leq$}}2 {=>}{{$\Rightarrow$}}2 {\ .}{{ $\circ$}}2
-} 
+}
 
 % From here down it's just arranging things on the page how I like them
 % - nothing to do with formatting code etc.

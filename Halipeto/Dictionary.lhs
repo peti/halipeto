@@ -1,30 +1,30 @@
-%  
-% Halipeto 2.0 -  Haskell static web page generator 
-% Copyright 2004 Andrew Cooke (andrew@acooke.org) 
-% Copyright 2007 Peter Simons (simons@cryp.to) 
-%  
-%     This program is free software; you can redistribute it and/or modify 
-%     it under the terms of the GNU General Public License as published by 
-%     the Free Software Foundation; either version 2 of the License, or 
-%     (at your option) any later version. 
-%  
-%     This program is distributed in the hope that it will be useful, 
-%     but WITHOUT ANY WARRANTY; without even the implied warranty of 
-%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-%     GNU General Public License for more details. 
-%  
-%     You should have received a copy of the GNU General Public License 
-%     along with this program; if not, write to the Free Software 
-%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
-%  
-% EXCEPT 
-%  
-% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml - 
-% see the COPYRIGHT and LICENSE in that directory.  The files included 
-% are a subset of the full HaXml distribution and have been modified to 
-% originate from the FromHaxml module (so that install on Win32 is 
-% easy). 
-%  
+%
+% Halipeto 2.0 -  Haskell static web page generator
+% Copyright 2004 Andrew Cooke (andrew@acooke.org)
+% Copyright 2007 Peter Simons (simons@cryp.to)
+%
+%     This program is free software; you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation; either version 2 of the License, or
+%     (at your option) any later version.
+%
+%     This program is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+%
+%     You should have received a copy of the GNU General Public License
+%     along with this program; if not, write to the Free Software
+%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%
+% EXCEPT
+%
+% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml -
+% see the COPYRIGHT and LICENSE in that directory.  The files included
+% are a subset of the full HaXml distribution and have been modified to
+% originate from the FromHaxml module (so that install on Win32 is
+% easy).
+%
 
 \section{Dictionary}
 
@@ -219,7 +219,7 @@ instance Dictionary DictNoCase a where
   values            = map snd . contents
   children d k      = map packNC $ children'' (unpackNC d) (uncase $ toNull k)
   children' d k     = children d (fromDot k)
-  adopt d1 (k, d2)  = 
+  adopt d1 (k, d2)  =
     packNC $ adopt'' (unpackNC d1) (uncase $ toNull k) (unpackNC d2)
   adopt' d1 (k, d2) = adopt d1 (fromDot k, d2)
   merge d1 d2       = packNC $ merge'' (unpackNC d1) (unpackNC d2)
@@ -235,24 +235,24 @@ third entries comomn to both.
 %%Haddock: A dictionary whose values can be ordered (and so sorted)
 \begin{code}
 class (Ord a, Dictionary d a) => OrdDictionary d a where
-  diff      :: d a -> d a 
+  diff      :: d a -> d a
                  -> ([([String], a)], [([String], a)], [([String], a)])
                  -- ^ Partition into common and distinct values
-  diff'     :: d a -> d a 
+  diff'     :: d a -> d a
                  -> ([(String, a)], [(String, a)], [(String, a)])
                  -- ^ Partition into common and distinct values .-format
 
 instance Ord a => OrdDictionary DictCase a where
-  diff d1 d2  = mapT3 (map (\(k, v) -> (fromNull k, v))) $ 
+  diff d1 d2  = mapT3 (map (\(k, v) -> (fromNull k, v))) $
                   diff'' (unpack d1) (unpack d2)
   diff' d1 d2 = mapT3 (map (\(k, v) -> (toDot k, v))) $ diff d1 d2
 
 instance Ord a => OrdDictionary DictNoCase a where
-  diff d1 d2  = mapT3 (map (\(k, v) -> (fromNull k, v))) $ 
+  diff d1 d2  = mapT3 (map (\(k, v) -> (fromNull k, v))) $
                   diff'' (unpackNC d1) (unpackNC d2)
   diff' d1 d2 = mapT3 (map (\(k, v) -> (toDot k, v))) $ diff d1 d2
 
-diff'' :: Ord a => Unpacked a -> Unpacked a 
+diff'' :: Ord a => Unpacked a -> Unpacked a
   -> ([(String, a)], [(String, a)], [(String, a)])
 diff'' d1 d2 = partition [] [] [] (contents'' d1) (contents'' d2)
 
@@ -266,7 +266,7 @@ partition o1 o2 b d1'@((k1, v1):d1) d2'@((k2, v2):d2) =
     case compare k1 k2 of
       LT -> partition (o1++[(k1, v1)]) o2 b d1 d2'
       GT -> partition o1 (o2++[(k2, v2)]) b d1' d2
-      EQ -> case compare v1 v2 of 
+      EQ -> case compare v1 v2 of
               LT -> partition (o1++[(k1, v1)]) o2 b d1 d2'
               GT -> partition o1 (o2++[(k2, v2)]) b d1' d2
               EQ -> partition o1 o2 (b++[(k1, v1)]) d1 d2
@@ -290,7 +290,7 @@ For example, given the dictionary:
 \begin{verbatim}
 foo.bar = baz
 foo.baz = hello
-\end{verbatim} 
+\end{verbatim}
 the string ``\{foo.\{foo.bar\}\} $\backslash$$\backslash$ world'' will
 evaluate to ``hello $\backslash$ world''.
 
@@ -324,7 +324,7 @@ txt d (c:s) | c == '\\' = c : (txt' d s)
 txt' _ ""               = error "end of string during character escape"
 txt' d (c:s)            = c : (txt d s)
 
-pth, pth' :: (Dictionary d String) => 
+pth, pth' :: (Dictionary d String) =>
   d String -> [String] -> String -> String -> String
 pth _ _ _ "" = error $ "end of string during substitution\n" ++
                        " (probably missing '}')"
@@ -440,7 +440,7 @@ via the Ord class.
 
 \begin{code}
 children'' :: Unpacked a -> String -> [Unpacked a]
-children'' (d, Just x) "" = 
+children'' (d, Just x) "" =
   combine $ (SU "" (Empty, Just x)):(sort $ subTree d [null])
 children'' (d, _) s  = combine . sort $ subTree d (s ++ [null])
 
@@ -458,7 +458,7 @@ should collect each node below a null.
 collect :: Dict a -> [(SU a)]
 collect d = foldD' f g d ("", Nothing)
   where
-    f n c v l m r pre'@(pre, vp) | c == null = 
+    f n c v l m r pre'@(pre, vp) | c == null =
       (l pre') ++ [SU (reverse pre) (match n, vp)] ++ (r pre')
                                  | otherwise =
       (l pre') ++ (m $ (c:pre, v)) ++ (r pre')
@@ -507,8 +507,8 @@ hack).
 \begin{code}
 data Dict a = Node {char  :: Char,
                     value :: Maybe a,
-                    left  :: Dict a, 
-                    match :: Dict a, 
+                    left  :: Dict a,
+                    match :: Dict a,
                     right :: Dict a}
             | Empty
 
@@ -518,7 +518,7 @@ foldD f a (Node c v l m r) = f c v (foldD f a l) (foldD f a m) (foldD f a r)
 
 foldD' :: (Dict b -> Char -> Maybe b -> a -> a -> a -> a) -> a -> Dict b -> a
 foldD' _ a Empty              = a
-foldD' f a n@(Node c v l m r) = f n c v (foldD' f a l) 
+foldD' f a n@(Node c v l m r) = f n c v (foldD' f a l)
                                   (foldD' f a m) (foldD' f a r)
 
 instance (Show a) => Show (Dict a) where
@@ -527,7 +527,7 @@ instance (Show a) => Show (Dict a) where
 showDict :: (Show t) => Dict t -> [Char]
 showDict Empty = "-"
 showDict (Node c v l m r) = "[" ++ [c] ++ ":" ++ (show v) ++ "," ++
-                              (show l) ++ "," ++ (show m) ++ "," ++ 
+                              (show l) ++ "," ++ (show m) ++ "," ++
                               (show r) ++ "]"
 \end{code}
 

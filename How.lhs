@@ -1,30 +1,30 @@
-%  
-% Halipeto 2.0 -  Haskell static web page generator 
-% Copyright 2004 Andrew Cooke (andrew@acooke.org) 
-% Copyright 2007 Peter Simons (simons@cryp.to) 
-%  
-%     This program is free software; you can redistribute it and/or modify 
-%     it under the terms of the GNU General Public License as published by 
-%     the Free Software Foundation; either version 2 of the License, or 
-%     (at your option) any later version. 
-%  
-%     This program is distributed in the hope that it will be useful, 
-%     but WITHOUT ANY WARRANTY; without even the implied warranty of 
-%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-%     GNU General Public License for more details. 
-%  
-%     You should have received a copy of the GNU General Public License 
-%     along with this program; if not, write to the Free Software 
-%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
-%  
-% EXCEPT 
-%  
-% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml - 
-% see the COPYRIGHT and LICENSE in that directory.  The files included 
-% are a subset of the full HaXml distribution and have been modified to 
-% originate from the FromHaxml module (so that install on Win32 is 
-% easy). 
-%  
+%
+% Halipeto 2.0 -  Haskell static web page generator
+% Copyright 2004 Andrew Cooke (andrew@acooke.org)
+% Copyright 2007 Peter Simons (simons@cryp.to)
+%
+%     This program is free software; you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation; either version 2 of the License, or
+%     (at your option) any later version.
+%
+%     This program is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+%
+%     You should have received a copy of the GNU General Public License
+%     along with this program; if not, write to the Free Software
+%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%
+% EXCEPT
+%
+% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml -
+% see the COPYRIGHT and LICENSE in that directory.  The files included
+% are a subset of the full HaXml distribution and have been modified to
+% originate from the FromHaxml module (so that install on Win32 is
+% easy).
+%
 
 \section{How it Works}
 
@@ -142,7 +142,7 @@ The following template will then generate a table of customer details
 
 \begin{verbatim}
 <table>
-  <div hal:repeat="key customers"> 
+  <div hal:repeat="key customers">
     <tr>
      <td hal:text="{key.first-name} {key.last-name}"/>
      <td hal:text="{key.phone}"/>
@@ -179,9 +179,9 @@ The following template will then use that ordering:
 
 \begin{verbatim}
 <table>
-  <div hal:repeat="key order"> 
-    <tr> 
-     <td hal:text="{customer.{key}.first-name} 
+  <div hal:repeat="key order">
+    <tr>
+     <td hal:text="{customer.{key}.first-name}
                    {customer.{key}.last-name}"/>
      <td hal:text="{customer.{key}.phone}"/>
     </tr>
@@ -260,7 +260,7 @@ Once the list is read, phoneListInit calls setCustomerPhone.
 \begin{code}
 setCustomerPhone :: [(String, String)] -> CustomFn
 setCustomerPhone [] ctx arg = do return (ctx, Continue)
-setCustomerPhone ((name, phone):list) ctx arg = 
+setCustomerPhone ((name, phone):list) ctx arg =
     do return (ctx'', Repeat setCustomerPhone list)
   where
     ctx' = add' ctx ("customer", name)
@@ -286,9 +286,9 @@ myfun:phonelist.  We do this by updating the dictionary of functions
 in the context.
 
 \begin{code}
-setMyFuns ::  (SubDictionary s, Dictionary f (CustomFn s f)) => 
+setMyFuns ::  (SubDictionary s, Dictionary f (CustomFn s f)) =>
   Context s f -> Context s f
-setMyFuns ctx = 
+setMyFuns ctx =
   ctx {funcs = add' (funcs ctx) ("myfun.phonelist", phoneListInit)}
 \end{code}
 

@@ -1,30 +1,30 @@
-%  
-% Halipeto 2.0 -  Haskell static web page generator 
-% Copyright 2004 Andrew Cooke (andrew@acooke.org) 
-% Copyright 2007 Peter Simons (simons@cryp.to) 
-%  
-%     This program is free software; you can redistribute it and/or modify 
-%     it under the terms of the GNU General Public License as published by 
-%     the Free Software Foundation; either version 2 of the License, or 
-%     (at your option) any later version. 
-%  
-%     This program is distributed in the hope that it will be useful, 
-%     but WITHOUT ANY WARRANTY; without even the implied warranty of 
-%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-%     GNU General Public License for more details. 
-%  
-%     You should have received a copy of the GNU General Public License 
-%     along with this program; if not, write to the Free Software 
-%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
-%  
-% EXCEPT 
-%  
-% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml - 
-% see the COPYRIGHT and LICENSE in that directory.  The files included 
-% are a subset of the full HaXml distribution and have been modified to 
-% originate from the FromHaxml module (so that install on Win32 is 
-% easy). 
-%  
+%
+% Halipeto 2.0 -  Haskell static web page generator
+% Copyright 2004 Andrew Cooke (andrew@acooke.org)
+% Copyright 2007 Peter Simons (simons@cryp.to)
+%
+%     This program is free software; you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation; either version 2 of the License, or
+%     (at your option) any later version.
+%
+%     This program is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+%
+%     You should have received a copy of the GNU General Public License
+%     along with this program; if not, write to the Free Software
+%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%
+% EXCEPT
+%
+% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml -
+% see the COPYRIGHT and LICENSE in that directory.  The files included
+% are a subset of the full HaXml distribution and have been modified to
+% originate from the FromHaxml module (so that install on Win32 is
+% easy).
+%
 
 \section{Templates}
 
@@ -75,7 +75,7 @@ keys for SQL access).
 
 %%Haddock: The context within which a template is evaluated
 \begin{code}
-data Context s f = 
+data Context s f =
     Ctx {state :: s String,          -- ^ State dictionary
          funcs :: f (CustomFn s f),  -- ^ Functions dictionary
          site  :: TreeSite s         -- ^ Site structure
@@ -149,7 +149,7 @@ type UpdateDict s = s String -> [String] -> s String
 \end{code}
 %%Haddock: Description of a page
 \begin{code}
-data Page s = 
+data Page s =
     Page {path       :: [String],     -- ^ Path to page
           template   :: String,       -- ^ Page template
           dictionary :: UpdateDict s  -- ^ State for page
@@ -157,7 +157,7 @@ data Page s =
 \end{code}
 %%Haddock: Hierarchical site structure
 \begin{code}
-data TreeSite s = 
+data TreeSite s =
     TreeSite {page     :: Maybe (Page s),  -- ^ Parent page
               children :: [TreeSite s]     -- ^ Sub-pages
              }
@@ -220,17 +220,17 @@ passes evalContents as the continuation).
 
 \begin{code}
 evalAttributes :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
-  Context s f -> (Context s f -> Element -> IO Element) -> Element 
+  Context s f -> (Context s f -> Element -> IO Element) -> Element
   -> [Attribute] -> IO Element
-evalAttributes ctx nxt (Elem nm [] cn) at = 
+evalAttributes ctx nxt (Elem nm [] cn) at =
     nxt ctx $ Elem nm (reverse at) cn
-evalAttributes ctx nxt (Elem nm (a@(anm, val):as) cn) at = 
+evalAttributes ctx nxt (Elem nm (a@(anm, val):as) cn) at =
     if pth == []
       then evalAttributes ctx nxt (Elem nm as cn) (a:at)
       else case fn of
         Just f  ->
           evalFunction ctx nxt (Elem nm as cn) at f $ attVal val
-        Nothing -> 
+        Nothing ->
           evalAttributes ctx nxt (Elem nm as cn) (a:at)
   where
     fnm@[pth,_] = parseFunction anm
@@ -280,28 +280,28 @@ to improve things later.
 
 \begin{code}
 evalFunction :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
-  Context s f -> (Context s f -> Element -> IO Element) -> Element 
+  Context s f -> (Context s f -> Element -> IO Element) -> Element
   -> [Attribute] -> CustomFn s f -> String -> IO Element
 evalFunction ctx nxt (Elem nm at cn) at' f val =
     do (ctx', res) <- f ctx val
        case res of
-         Attr n v  -> evalAttributes ctx' nxt (Elem nm at cn) 
+         Attr n v  -> evalAttributes ctx' nxt (Elem nm at cn)
                         ((n, AttValue [Left v]):at')
-         Text p s  -> 
+         Text p s  ->
            case p of
-             Before  -> evalAttributes ctx' nxt 
+             Before  -> evalAttributes ctx' nxt
                           (Elem nm at ([CString False s]++cn)) at'
-             After   -> evalAttributes ctx' nxt 
+             After   -> evalAttributes ctx' nxt
                           (Elem nm at (cn++[CString False s])) at'
-             Replace -> evalAttributes ctx' nxt 
+             Replace -> evalAttributes ctx' nxt
                           (Elem nm at [CString False s]) at'
-         Xml p e  -> 
+         Xml p e  ->
            case p of
-             Before  -> evalAttributes ctx' nxt 
+             Before  -> evalAttributes ctx' nxt
                           (Elem nm at ((map CElem e)++cn)) at'
-             After   -> evalAttributes ctx' nxt 
+             After   -> evalAttributes ctx' nxt
                           (Elem nm at (cn++(map CElem e))) at'
-             Replace -> evalAttributes ctx' nxt 
+             Replace -> evalAttributes ctx' nxt
                           (Elem nm at (map CElem e)) at'
          Repeat f' -> loopAttribute ctx' (Elem nm at cn) at' f' val
          Continue  -> evalAttributes ctx' nxt (Elem nm at cn) at'
@@ -311,7 +311,7 @@ skip :: Context s f -> Element -> IO Element
 skip _ e = do return e
 
 loopAttribute :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
-  Context s f -> Element -> [Attribute] -> CustomFn s f -> String 
+  Context s f -> Element -> [Attribute] -> CustomFn s f -> String
   -> IO Element
 loopAttribute ctx e@(Elem nm _ _) at1 f val =
     do (Elem _ at2 cn2) <- evalAttributes ctx evalContents e []  -- first

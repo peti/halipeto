@@ -189,7 +189,7 @@ readLines h tr dct ky =
 dropWindowsReturn :: String -> String
 dropWindowsReturn ""                = ""
 dropWindowsReturn (c:s) | c == '\r' = dropWindowsReturn s
-			| otherwise = c:(dropWindowsReturn s)
+                        | otherwise = c:(dropWindowsReturn s)
 
 splitLine :: Translate -> [String] -> String -> Maybe ([String], String)
 splitLine tr ky txt =

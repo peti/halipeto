@@ -1,30 +1,30 @@
-%  
-% Halipeto 2.0 -  Haskell static web page generator 
-% Copyright 2004 Andrew Cooke (andrew@acooke.org) 
-% Copyright 2007 Peter Simons (simons@cryp.to) 
-%  
-%     This program is free software; you can redistribute it and/or modify 
-%     it under the terms of the GNU General Public License as published by 
-%     the Free Software Foundation; either version 2 of the License, or 
-%     (at your option) any later version. 
-%  
-%     This program is distributed in the hope that it will be useful, 
-%     but WITHOUT ANY WARRANTY; without even the implied warranty of 
-%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-%     GNU General Public License for more details. 
-%  
-%     You should have received a copy of the GNU General Public License 
-%     along with this program; if not, write to the Free Software 
-%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
-%  
-% EXCEPT 
-%  
-% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml - 
-% see the COPYRIGHT and LICENSE in that directory.  The files included 
-% are a subset of the full HaXml distribution and have been modified to 
-% originate from the FromHaxml module (so that install on Win32 is 
-% easy). 
-%  
+%
+% Halipeto 2.0 -  Haskell static web page generator
+% Copyright 2004 Andrew Cooke (andrew@acooke.org)
+% Copyright 2007 Peter Simons (simons@cryp.to)
+%
+%     This program is free software; you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation; either version 2 of the License, or
+%     (at your option) any later version.
+%
+%     This program is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+%
+%     You should have received a copy of the GNU General Public License
+%     along with this program; if not, write to the Free Software
+%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%
+% EXCEPT
+%
+% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml -
+% see the COPYRIGHT and LICENSE in that directory.  The files included
+% are a subset of the full HaXml distribution and have been modified to
+% originate from the FromHaxml module (so that install on Win32 is
+% easy).
+%
 
 \section{Pages}
 
@@ -134,7 +134,7 @@ except the initial index.
 \begin{code}
 type PageGen s = s String -> s String -> TreeSite s
 \end{code}
-%%Haddock: The intermediate function used to construct a list 
+%%Haddock: The intermediate function used to construct a list
 %%Haddock: of pages within a hierarchy
 \begin{code}
 type PageGenS s = s String -> s String -> [TreeSite s]
@@ -153,9 +153,9 @@ idD d _ = d
 
 %%Haddock: Construct a page with its children
 \begin{code}
-page :: SubDictionary s => 
+page :: SubDictionary s =>
   [String] -> String -> UpdateDict s -> PageGenS s -> PageGen s
-page pth tmpl upd ts dct dc0 = 
+page pth tmpl upd ts dct dc0 =
     TreeSite (Just $ Page pth' tmpl' upd') (ts dct' dc0)
   where
     dct' = upd dct []
@@ -193,7 +193,7 @@ repeat to frm pg dct dc0 = repeat' to' frm (children' dct frm') pg dct dc0
   where
     [to', frm'] = subAll dct [to, frm]
 
-repeat' :: SubDictionary s => 
+repeat' :: SubDictionary s =>
   String -> String -> [s String] -> PageGen s -> PageGenS s
 repeat' _  frm [] _  dct  _  = error $ "nothing to repeat for " ++ frm ++
                                           "\n" ++ (show $ contents dct)
@@ -261,8 +261,8 @@ generate' ctx (Just pg) prv =
     tmplPath = frm `slash` (template pg)
 
 updateState :: (SubDictionary s) => s String -> Page s -> s String
-updateState dct pg = addAll (dictionary pg dct []) 
-                       [rootPath pth, 
+updateState dct pg = addAll (dictionary pg dct [])
+                       [rootPath pth,
                         pathPath pth,
                         ([hal, "template"], template pg)]
   where

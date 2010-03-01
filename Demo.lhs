@@ -1,30 +1,30 @@
-%  
-% Halipeto 2.0 -  Haskell static web page generator 
-% Copyright 2004 Andrew Cooke (andrew@acooke.org) 
-% Copyright 2007 Peter Simons (simons@cryp.to) 
-%  
-%     This program is free software; you can redistribute it and/or modify 
-%     it under the terms of the GNU General Public License as published by 
-%     the Free Software Foundation; either version 2 of the License, or 
-%     (at your option) any later version. 
-%  
-%     This program is distributed in the hope that it will be useful, 
-%     but WITHOUT ANY WARRANTY; without even the implied warranty of 
-%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-%     GNU General Public License for more details. 
-%  
-%     You should have received a copy of the GNU General Public License 
-%     along with this program; if not, write to the Free Software 
-%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
-%  
-% EXCEPT 
-%  
-% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml - 
-% see the COPYRIGHT and LICENSE in that directory.  The files included 
-% are a subset of the full HaXml distribution and have been modified to 
-% originate from the FromHaxml module (so that install on Win32 is 
-% easy). 
-%  
+%
+% Halipeto 2.0 -  Haskell static web page generator
+% Copyright 2004 Andrew Cooke (andrew@acooke.org)
+% Copyright 2007 Peter Simons (simons@cryp.to)
+%
+%     This program is free software; you can redistribute it and/or modify
+%     it under the terms of the GNU General Public License as published by
+%     the Free Software Foundation; either version 2 of the License, or
+%     (at your option) any later version.
+%
+%     This program is distributed in the hope that it will be useful,
+%     but WITHOUT ANY WARRANTY; without even the implied warranty of
+%     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%     GNU General Public License for more details.
+%
+%     You should have received a copy of the GNU General Public License
+%     along with this program; if not, write to the Free Software
+%     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+%
+% EXCEPT
+%
+% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml -
+% see the COPYRIGHT and LICENSE in that directory.  The files included
+% are a subset of the full HaXml distribution and have been modified to
+% originate from the FromHaxml module (so that install on Win32 is
+% easy).
+%
 
 \section{Demonstration}
 
@@ -48,7 +48,7 @@ database/
 +- tradn/ (translation of common words, titles)
 |  +- intnleng.haldx
 |  |  +- title = title
-|  |  :   
+|  |  :
 |  +- chile.haldx
 |     :
 +- groups/
@@ -197,7 +197,7 @@ import System.IO.Unsafe
 %%Haddock: Define the site structure
 \begin{code}
 mkStruct :: SubDictionary s => PageGen s
-mkStruct = 
+mkStruct =
     (page ["index.html"] "front-page.html" idD
       (repeat "locale" "locale-list"
         (page ["{locale}", "index.html"] "index-locale.html" idD
@@ -215,13 +215,13 @@ because case is insignificant in XML attribute names (I believe).
 \begin{code}
 main :: IO ()
 main = buildPancitoSite "./demo/database" "./demo/pancito" "./demo/templates"
-	 
+
 
 buildPancitoSite :: FilePath -> FilePath -> FilePath -> IO ()
-buildPancitoSite db html tmpl = 
+buildPancitoSite db html tmpl =
     do dct <- readDB' noCVS (setSiteDetails empty html tmpl) db
        ste <- return $ mkStruct dct dct
-       fns <- return $ addAll' (addDefaultsFn emptyNC) 
+       fns <- return $ addAll' (addDefaultsFn emptyNC)
                                [("pan.menu", menu),
                                 ("pan.menulink", menuLink)]
        ctx <- return $ Ctx (groupContents dct) fns ste
@@ -244,7 +244,7 @@ they aren't necessarily the later columns).
 Instead, it seems simpler to construct a table that we can iterate over
 using the normal constructs.  The following code constructs
 \begin{verbatim}table.row.column.[image,group]\end{verbatim}
-where image is either a valid image name or "none", row and column 
+where image is either a valid image name or "none", row and column
 index the complete table, and [...] encloses alternative child nodes.
 
 We could associate this function with an HTML attribute, but it's
@@ -253,10 +253,10 @@ site.
 
 \begin{code}
 groupContents :: SubDictionary s => s String -> s String
-groupContents dct = 
+groupContents dct =
     pad $ foldl byGroup (dct, 1, 0) $ children' dct "group-list"
 
-byGroup :: SubDictionary s => 
+byGroup :: SubDictionary s =>
   (s String, Int, Int) -> s String -> (s String, Int, Int)
 byGroup (dct, col, mx) chld = (dct', col+1, mx'')
   where
@@ -265,7 +265,7 @@ byGroup (dct, col, mx) chld = (dct', col+1, mx'')
     grp = fromJust' "missing child group" $ search' chld ""
     pth = ["groups", grp, "images"]
 
-byImage :: SubDictionary s => 
+byImage :: SubDictionary s =>
   String -> Int -> (s String, Int) -> s String -> (s String, Int)
 byImage grp col (dct, row) chld = (dct', row+1)
   where
@@ -308,14 +308,14 @@ tableMenu ste dct lab = Elem "table" menuClass (map CElem rows)
 
 mkRow :: [Content] -> [Content] -> [Element]
 mkRow ims cnt = [Elem "tr" menuClass
-                  [CElem $ Elem "td" [] 
-                    [CElem $ Elem "table" [] 
+                  [CElem $ Elem "td" []
+                    [CElem $ Elem "table" []
                       [CElem $ Elem "tr" []
                         [CElem $ Elem "td" menuClass ims,
                          CElem $ Elem "td" menuClass cnt]]]]]
 
 menu :: (SubDictionary s, Dictionary f (CustomFn s f)) => CustomFn s f
-menu ctx arg = 
+menu ctx arg =
     do return $ (ctx, Xml Before [tableMenu ste dct label])
   where
     ste = site ctx
@@ -341,48 +341,48 @@ label :: SubDictionary s => Label s
 label dct pg =
     case whichTempl $ template pg of
 
-      FP -> 
+      FP ->
         Nothing
 
-      LOC -> 
+      LOC ->
         if typ == LOC && lcl == Just lcl'
-          then 
+          then
             Just $ mkRow (sqr 1) [CString True txt]
-          else 
-            Just $ mkRow (aro 1) 
-                     [CElem $ Elem "a" [menuClass', 
+          else
+            Just $ mkRow (aro 1)
+                     [CElem $ Elem "a" [menuClass',
                                         ("href", AttValue [Left lnk])]
                                        [CString True txt]]
           where
-            txt = fromJust' "missing locale" 
+            txt = fromJust' "missing locale"
                     $ search dct ["locales", lcl', "tradn", lcl']
 
       GRP ->
         if typ == GRP && lcl == Just lcl' && grp == Just grp'
-          then 
+          then
             Just $ mkRow (sqr 2) [CString True grp'']
           else if lcl == Just lcl' || (grp == Just grp' && typ == IMG)
                  then Just $ mkRow (aro 2)
-                               [CElem $ Elem "a" 
-                                             [menuClass', 
+                               [CElem $ Elem "a"
+                                             [menuClass',
                                               ("href", AttValue [Left lnk])]
                                              [CString True grp'']]
                  else Nothing
 
       IMG ->
-        if typ == IMG && lcl == Just lcl' && 
+        if typ == IMG && lcl == Just lcl' &&
              grp == Just grp'&& img == Just img'
           then Just $ (mkRow (sqr 3) [CString True txt]) ++ imageMenu
           else if lcl == Just lcl' && grp == Just grp'
                  then Just $ mkRow (aro 3)
-                               [CElem $ Elem "a" 
-                                             [menuClass', 
+                               [CElem $ Elem "a"
+                                             [menuClass',
                                               ("href", AttValue [Left lnk])]
                                              [CString True txt]]
                  else if grp == Just grp' && img == Just img'
                         then Just $ mkRow (aro 3)
-                               [CElem $ Elem "a" 
-                                             [menuClass', 
+                               [CElem $ Elem "a"
+                                             [menuClass',
                                               ("href", AttValue [Left lnk])]
                                              [CString True txt]]
                         else Nothing
@@ -394,8 +394,8 @@ label dct pg =
         if typ == ORD && lcl == Just lcl'
           then Just $ (mkRow (sqr 2) [CString True txt]) ++ orderMenu
           else if lcl == Just lcl'
-            then Just $ mkRow (aro 2) 
-                          [CElem $ Elem "a" [menuClass', 
+            then Just $ mkRow (aro 2)
+                          [CElem $ Elem "a" [menuClass',
                                              ("href", AttValue [Left lnk])]
                                             [CString True txt]]
             else Nothing
@@ -404,20 +404,20 @@ label dct pg =
                     $ search dct ["locales", lcl', "tradn", "order"]
 
   where
-    typ = whichTempl . fromJust' "missing template" 
+    typ = whichTempl . fromJust' "missing template"
                          $ search dct [hal, "template"]
     lcl = search dct ["locale"]
-    lcl' = fromJust' "missing menu locale" 
-             $ search dct [hal, "menu", "locale"] 
+    lcl' = fromJust' "missing menu locale"
+             $ search dct [hal, "menu", "locale"]
     grp = search dct ["group"]
-    grp' = fromJust' "missing menu group" 
-             $ search dct [hal, "menu", "group"] 
+    grp' = fromJust' "missing menu group"
+             $ search dct [hal, "menu", "group"]
     grp'' = fromJust' ("missing menu name: " ++ grp')
-              $ search dct ["groups", "names", grp'] 
+              $ search dct ["groups", "names", grp']
     img = search dct ["image"]
     img' = fromJust' "missing menu image"
-             $ search dct [hal, "menu", "image"] 
-    lnk = (fromJust' "missing root" $ search dct [hal, "root"]) 
+             $ search dct [hal, "menu", "image"]
+    lnk = (fromJust' "missing root" $ search dct [hal, "root"])
             `slash` (toSlash $ path pg)
     aro n = imgList "arrow.png" ">" dct n
     sqr n = imgList "square.png" "." dct n
@@ -425,28 +425,28 @@ label dct pg =
       where
         cols = map (fromJust' "missing child" . flip search [""])
                    (children dct ["order-list"])
-        mkRow' key = Elem "tr" menuClass 
+        mkRow' key = Elem "tr" menuClass
                        [CElem $ Elem "td" menuClass
-                         [CElem $ Elem "a" 
-                            [menuClass', 
+                         [CElem $ Elem "a"
+                            [menuClass',
                              ("href", AttValue [Left $ "#" ++ key])]
                             ((aro 3) ++ [nbsp] ++
-                             [CString True 
-                               (substitute dct $ "{locales.{locale}.tradn." 
+                             [CString True
+                               (substitute dct $ "{locales.{locale}.tradn."
                                                  ++ key ++ "}")])]]
     imageMenu = mkRow (aro 4) $ map CElem (parseElements $
         "<a hal:attribute='href #discussion'"++
            "hal:textAfter='{locales.{locale}.tradn.discussion}'>"++
          "</a>")
-   
+
 
 imgList :: SubDictionary s => String -> String -> s String -> Int -> [Content]
 imgList name alt dct 0 = [nbsp]
-imgList name alt dct n = 
-    (CElem $ Elem "img" 
-       [menuClass', 
-        ("src", 
-         AttValue [Left (substitute dct $ 
+imgList name alt dct n =
+    (CElem $ Elem "img"
+       [menuClass',
+        ("src",
+         AttValue [Left (substitute dct $
                           "{hal.root}/{default.imgdir}/" ++ name)]),
         ("alt", AttValue [Left alt])
        ] [])
@@ -455,8 +455,8 @@ imgList name alt dct n =
 
 \begin{code}
 menuLink :: CustomFn s f
-menuLink = 
-    mkElements Before $ 
+menuLink =
+    mkElements Before $
       "<p class='menulink'>"++
         "<a hal:attribute='href #menu'"++
            "hal:text='{locales.{locale}.tradn.menu}'>"++
