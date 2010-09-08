@@ -44,8 +44,9 @@ import Halipeto.Template
 import Halipeto.Dictionary
 import Halipeto.Utilities
 import Data.Char
-import Text.XML.HaXml.Parse
+import Text.XML.HaXml.Parse hiding ( element )
 import Text.XML.HaXml.Types
+import Text.XML.HaXml.Posn
 \end{code}
 
 \subsection{Argument Lists}
@@ -236,17 +237,17 @@ functions.
 
 %%Haddock: Parse text as XML
 \begin{code}
-parseElements :: String -> [Element]
+parseElements :: String -> [Element Posn]
 parseElements txt = fromElement $ parseElement "parseelements" txt
   where
     fromElement (Elem "parseelements" _ els) = map unContent els
-    unContent (CElem x) = x
-    unContent s@(CString _ _) = Elem "p" [] [s]
+    unContent (CElem x _) = x
+    unContent s@(CString _ _ _) = Elem "p" [] [s]
     unContent _ = error "cannot parse xml as element"
 \end{code}
 %%Haddock: Parse text as XML within an element
 \begin{code}
-parseElement :: String -> String -> Element
+parseElement :: String -> String -> Element Posn
 parseElement elt txt = fromDoc $ xmlParse txt txt'
   where
     txt' = "<?xml version='1.0' encoding='iso-8859-1'?><" ++ elt ++ ">"

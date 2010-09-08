@@ -44,6 +44,7 @@ import Halipeto.Dictionary
 import Halipeto.Utilities
 import Text.XML.HaXml.Pretty
 import Text.XML.HaXml.Types
+import Text.XML.HaXml.Posn
 import Data.Maybe
 import System.IO
 import Control.Monad
@@ -314,14 +315,14 @@ Label selects pages and gives the HTML associated with each.
 
 %%Haddock: Define a menu label for a page
 \begin{code}
-type Label s = s String -> Page s -> Maybe [Element]
+type Label s = s String -> Page s -> Maybe [Element Posn]
 \end{code}
 
 Collect groups the HTML associated with pages.
 
 %%Haddock: Combine menu labels
 \begin{code}
-type Collect = [Element] -> [Element] -> [Element]
+type Collect = [Element Posn] -> [Element Posn] -> [Element Posn]
 \end{code}
 
 \begin{code}
@@ -333,11 +334,11 @@ Traverse the page structure collecting the menu labels for each page.
 
 %%Haddock: Generate a menu
 \begin{code}
-baseMenu :: Collect -> TreeSite s -> s String -> Label s -> [Element]
+baseMenu :: Collect -> TreeSite s -> s String -> Label s -> [Element Posn]
 baseMenu col ste dct lab = foldT (baseNode col dct lab) [] ste
 
 baseNode :: Collect -> s String -> Label s
-  -> Maybe (Page s) -> [Element] -> [Element]
+  -> Maybe (Page s) -> [Element Posn] -> [Element Posn]
 baseNode  _   _   _  Nothing   rows = rows
 baseNode col dct lab (Just pg) rows =
     case lab dct' pg of
@@ -353,12 +354,13 @@ The generated menu is a table containing those rows.
 
 %%Haddock: Generate a flat menu
 \begin{code}
-listMenu :: TreeSite s -> s String -> Label s -> Element
-listMenu ste dct lab = Elem "table" menuClass (map CElem rows)
+listMenu :: TreeSite s -> s String -> Label s -> Element Posn
+listMenu ste dct lab = Elem "table" menuClass (map (\x -> CElem x noPos) rows)
   where
     rows = baseMenu makeRow ste dct lab
 
 makeRow :: Collect
-makeRow els rows = (Elem "tr" menuClass
-                     [CElem $ Elem "td" menuClass (map CElem els)]) : rows
+makeRow els rows
+  = (Elem "tr" menuClass
+            [CElem (Elem "td" menuClass (map (\x -> CElem x noPos) els)) noPos]) : rows
 \end{code}

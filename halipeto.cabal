@@ -12,7 +12,7 @@ Description:            A library for generating static HTML pages from XML
                         templates and a file-based value dictionary.
 Cabal-Version:          >= 1.6
 Build-Type:             Simple
-Tested-With:            GHC == 6.12.1
+Tested-With:            GHC == 6.12.3
 
 Source-Repository head
   Type:                 git
@@ -25,6 +25,5 @@ Library
                         Halipeto.SimpleDB,
                         Halipeto.Template,
                         Halipeto.Utilities
-  Build-Depends:        base >= 3 && < 5, HaXml == 1.13.*, directory, pandoc
+  Build-Depends:        base >= 3 && < 5, HaXml >= 1.20, directory, pandoc
   Extensions:           MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-  Ghc-Options:          -Wall

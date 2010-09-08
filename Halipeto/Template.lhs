@@ -46,8 +46,9 @@ module Halipeto.Template (
 import Data.Maybe
 import Data.Char
 import Halipeto.Dictionary
-import Text.XML.HaXml.Parse
+import Text.XML.HaXml.Parse hiding ( reference )
 import Text.XML.HaXml.Types
+import Text.XML.HaXml.Posn
 \end{code}
 
 \subsection{Context}
@@ -119,12 +120,12 @@ data Position = Before   -- ^ Insert data before current contents
 \end{code}
 %%Haddock: The result from a function called by the template engine
 \begin{code}
-data Result s f = Attr Name String        -- ^ Add an attribute
-                | Text Position String    -- ^ Add text
-                | Xml Position [Element]  -- ^ Add XML
-                | Repeat (CustomFn s f)   -- ^ Recurse on function
-                | Continue                -- ^ Process next attribute
-                | Skip                    -- ^ Delete contents
+data Result s f = Attr Name String              -- ^ Add an attribute
+                | Text Position String          -- ^ Add text
+                | Xml Position [Element Posn]   -- ^ Add XML
+                | Repeat (CustomFn s f)         -- ^ Recurse on function
+                | Continue                      -- ^ Process next attribute
+                | Skip                          -- ^ Delete contents
 \end{code}
 %%Haddock: The XML namespace for builtin functions
 \begin{code}
@@ -178,7 +179,7 @@ which is invalid (or at least pointless) HTML, but a valid template.
 
 %%Haddock: Current implementation uses HaXml
 \begin{code}
-type Template = Document
+type Template = Document Posn
 \end{code}
 %%Haddock: Read and parse a template
 \begin{code}
@@ -208,7 +209,7 @@ sub-structure may itself change each iteration).
 %%Haddock: Evaluate the element (and its contents)
 \begin{code}
 evalElement :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
-  Context s f -> Element -> IO Element
+  Context s f -> Element Posn -> IO (Element Posn)
 evalElement ctx e@(Elem _ _ _) =
     evalAttributes ctx evalContents e []
 \end{code}
@@ -220,8 +221,8 @@ passes evalContents as the continuation).
 
 \begin{code}
 evalAttributes :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
-  Context s f -> (Context s f -> Element -> IO Element) -> Element
-  -> [Attribute] -> IO Element
+  Context s f -> (Context s f -> Element Posn -> IO (Element Posn)) -> Element Posn
+  -> [Attribute] -> IO (Element Posn)
 evalAttributes ctx nxt (Elem nm [] cn) at =
     nxt ctx $ Elem nm (reverse at) cn
 evalAttributes ctx nxt (Elem nm (a@(anm, val):as) cn) at =
@@ -280,8 +281,8 @@ to improve things later.
 
 \begin{code}
 evalFunction :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
-  Context s f -> (Context s f -> Element -> IO Element) -> Element
-  -> [Attribute] -> CustomFn s f -> String -> IO Element
+  Context s f -> (Context s f -> Element Posn -> IO (Element Posn)) -> Element Posn
+  -> [Attribute] -> CustomFn s f -> String -> IO (Element Posn)
 evalFunction ctx nxt (Elem nm at cn) at' f val =
     do (ctx', res) <- f ctx val
        case res of
@@ -290,29 +291,29 @@ evalFunction ctx nxt (Elem nm at cn) at' f val =
          Text p s  ->
            case p of
              Before  -> evalAttributes ctx' nxt
-                          (Elem nm at ([CString False s]++cn)) at'
+                          (Elem nm at ([CString False s noPos]++cn)) at'
              After   -> evalAttributes ctx' nxt
-                          (Elem nm at (cn++[CString False s])) at'
+                          (Elem nm at (cn++[CString False s noPos])) at'
              Replace -> evalAttributes ctx' nxt
-                          (Elem nm at [CString False s]) at'
+                          (Elem nm at [CString False s noPos]) at'
          Xml p e  ->
            case p of
              Before  -> evalAttributes ctx' nxt
-                          (Elem nm at ((map CElem e)++cn)) at'
+                          (Elem nm at ((map (\x -> CElem x noPos) e)++cn)) at'
              After   -> evalAttributes ctx' nxt
-                          (Elem nm at (cn++(map CElem e))) at'
+                          (Elem nm at (cn++(map (\x -> CElem x noPos) e))) at'
              Replace -> evalAttributes ctx' nxt
-                          (Elem nm at (map CElem e)) at'
+                          (Elem nm at (map (\x -> CElem x noPos) e)) at'
          Repeat f' -> loopAttribute ctx' (Elem nm at cn) at' f' val
          Continue  -> evalAttributes ctx' nxt (Elem nm at cn) at'
          Skip      -> evalAttributes ctx' skip (Elem nm [] []) at'
 
-skip :: Context s f -> Element -> IO Element
+skip :: Context s f -> Element Posn -> IO (Element Posn)
 skip _ e = do return e
 
 loopAttribute :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
-  Context s f -> Element -> [Attribute] -> CustomFn s f -> String
-  -> IO Element
+  Context s f -> Element Posn -> [Attribute] -> CustomFn s f -> String
+  -> IO (Element Posn)
 loopAttribute ctx e@(Elem nm _ _) at1 f val =
     do (Elem _ at2 cn2) <- evalAttributes ctx evalContents e []  -- first
        (Elem _ at3 cn3) <- evalFunction ctx skip e [] f val      -- remain
@@ -326,14 +327,14 @@ joinAtts :: [Attribute] -> [Attribute] -> [Attribute] -> [Attribute]
 joinAtts at1 at2 at3 = reverse (revAppend (revAppend at1 at2) at3)
 
 evalContents :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
-  Context s f -> Element -> IO Element
+  Context s f -> Element Posn -> IO (Element Posn)
 evalContents ctx (Elem nm at cn) = do cn' <- mapM (evalContent ctx) cn
                                       return $ Elem nm at cn'
 
 evalContent :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
-  Context s f -> Content -> IO Content
-evalContent ctx (CElem e) = do e' <- evalElement ctx e
-                               return $ CElem e'
+  Context s f -> Content Posn -> IO (Content Posn)
+evalContent ctx (CElem e pos) = do e' <- evalElement ctx e
+                                   return $ CElem e' pos
 evalContent _  c          = do return c
 \end{code}
 
@@ -344,7 +345,7 @@ The following code generates HTML from a template.
 %%Haddock: Evaluate a complete template
 \begin{code}
 evalDocument :: (SubDictionary s, Dictionary f (CustomFn s f)) =>
-  Context s f -> Document -> IO Document
+  Context s f -> Document Posn -> IO (Document Posn)
 evalDocument ctx (Document p st elt msc) =
     do elt' <- evalElement ctx elt
        return $ erase $ Document p st elt' msc
@@ -378,21 +379,21 @@ not comply with DTDs, even though the final document will (but then
 that has always been possible) --- is this a problem?
 
 \begin{code}
-erase :: Document -> Document
+erase :: Document Posn -> Document Posn
 erase (Document p st elt msc) = Document p st (eraseChildren elt) msc
 
-eraseChildren :: Element -> Element
+eraseChildren :: Element Posn -> Element Posn
 eraseChildren (Elem nm at cn) = Elem nm at $ foldl eraseContent [] cn
 
-eraseContent :: [Content] -> Content -> [Content]
-eraseContent cn (CElem el) = if hasErase el'
+eraseContent :: [Content Posn] -> Content Posn -> [Content Posn]
+eraseContent cn (CElem el pos) = if hasErase el'
                                then cn++cn'
-                               else cn++[CElem el']
+                               else cn++[CElem el' pos]
   where
     el'@(Elem _ _ cn') = eraseChildren el
 eraseContent cn x          = cn++[x]
 
-hasErase :: Element -> Bool
+hasErase :: Element Posn -> Bool
 hasErase (Elem _ at _) = any f at
   where
     f ("hal:erase", _) = True
