@@ -17,14 +17,6 @@
 %     along with this program; if not, write to the Free Software
 %     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 %
-% EXCEPT
-%
-% Files in FromHaxml are from HaXml - http://www.cs.york.ac.uk/HaXml -
-% see the COPYRIGHT and LICENSE in that directory.  The files included
-% are a subset of the full HaXml distribution and have been modified to
-% originate from the FromHaxml module (so that install on Win32 is
-% easy).
-%
 
 \section{Simple Database}
 
