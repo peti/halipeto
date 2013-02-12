@@ -5,7 +5,7 @@ License:                GPL
 License-File:           COPYING
 Author:                 Andrew Cooke <andrew@acooke.org>, Peter Simons <simons@cryp.to>
 Maintainer:             Peter Simons <simons@cryp.to>
-Homepage:               http://gitorious.org/halipeto
+Homepage:               http://github.com/peti/halipeto
 Category:               Text
 Synopsis:               Haskell Static Web Page Generator
 Description:            A library for generating static HTML pages from XML
@@ -16,7 +16,7 @@ Tested-With:            GHC == 7.0.2
 
 Source-Repository head
   Type:                 git
-  Location:             git://gitorious.org/halipeto/mainline.git
+  Location:             git://github.com/peti/halipeto.git
 
 Library
   Exposed-Modules:      Halipeto.Dictionary,
